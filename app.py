@@ -7,6 +7,9 @@ import folium
 from dash.dependencies import Output, Input
 from streamz.dataframe import PeriodicDataFrame
 
+# APP PROPERTIES
+app = dash.Dash(name='UnWaste! FrontEnd')
+app.title = "UnWaste! Project"
 
 # EXTERNAL SETTINGS
 # should be loaded elsewhere and imported here / in a submodule
@@ -30,31 +33,25 @@ def update_map(n):
         folium.Marker(location=[p[0], p[1]], icon = folium.features.CustomIcon("assets\dustbin.png",icon_size=(25, 25))).add_to(rome_map)
 
     if n  % len(POSITIONS) > 0:
-        print('added')
         folium.PolyLine(POSITIONS[0: (n % len(POSITIONS) + 1)], color='red', weight=10, opacity=0.8).add_to(rome_map)
 
-    rome_map.save('map.html')
+    # rome_map.save('map.html')
+    # return open("map.html", "r").read()
 
-    return open("map.html", "r").read()
-
-
-# APP PROPERTIES
-app = dash.Dash(name=_'UnWaste! FrontEnd')
-app.title = "UnWaste! Project"
+    return rome_map._repr_html_()
 
 app.layout = html.Div(
     children = [
-        html.Div(children = [html.H1("UnWaste!"),html.P('Demo dashboard)], className = 'Header'),
+        html.Div(children = [html.H1("UnWaste!"),html.P('Demo dashboard)', className = 'Header')]),
         html.Div(children = [html.Iframe(id = 'map', srcDoc = None, width = "50%", height = "500", style={'display': 'inline-block'}),
                              dcc.Graph(id="graph2",style={'display': 'inline-block', 'height' : "600"})]),
         dcc.Interval(
             id='interval-component',
-            interval=UPDATE_INTERVAL
+            interval=UPDATE_INTERVAL,
             n_intervals=0
-        ) 
+        )
     ]
 )
-
 
 if __name__ == "__main__":
     app.run_server(debug=True)
