@@ -3,43 +3,58 @@ import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 import numpy as np
-import folium 
+import folium
 from dash.dependencies import Output, Input
-import schedule 
-import threading, time 
-
-print(dash.__version__)
+from streamz.dataframe import PeriodicDataFrame
 
 
+# EXTERNAL SETTINGS
+# should be loaded elsewhere and imported here / in a submodule
+START_COORDS = (41.89117549369146, 12.502362854652286)
+POSITIONS = [(41.8908906679924, 12.502572097053521), 
+            (41.891579262511144, 12.502176550683817), 
+            (41.8924103430201, 12.503031390817107), 
+            (41.893027676367694, 12.501927753222729)]
+UPDATE_INTERVAL = 5 * 1000 # milliseconds
+
+# theoretically, the paths / markups should be loaded in real time from some service
+# in this demo, however, we can just add them from a database of precoumputed positions
+@app.callback(Output('map', 'srcDoc'),
+              Input('interval-component', 'n_intervals'))  # add an input here to load the pathon the map at a user's notice
+def update_map(n):
+    global START_COORDS, POSITIONS
+
+    rome_map = folium.Map(location = START_COORDS, title = "Rome", zoom_start = 16, min_zoom = 16, max_zoom = 16)
+
+    for p in POSITIONS: 
+        folium.Marker(location=[p[0], p[1]], icon = folium.features.CustomIcon("assets\dustbin.png",icon_size=(25, 25))).add_to(rome_map)
+
+    if n  % len(POSITIONS) > 0:
+        print('added')
+        folium.PolyLine(POSITIONS[0: (n % len(POSITIONS) + 1)], color='red', weight=10, opacity=0.8).add_to(rome_map)
+
+    rome_map.save('map.html')
+
+    return open("map.html", "r").read()
 
 
-app = dash.Dash(__name__)
+# APP PROPERTIES
+app = dash.Dash(name=_'UnWaste! FrontEnd')
 app.title = "UnWaste! Project"
 
 app.layout = html.Div(
     children = [
-        html.Div(children = [html.H1("UnWaste!"),html.P('Prova della dashboard!')], className = 'Header'),
-        html.Div(children = [html.Iframe(id = 'map', srcDoc = open("ROme.html", "r").read(), width = "50%", height = "500", style={'display': 'inline-block'}),
-                             dcc.Graph(id="graph2",style={'display': 'inline-block', 'height' : "600"})])    
+        html.Div(children = [html.H1("UnWaste!"),html.P('Demo dashboard)], className = 'Header'),
+        html.Div(children = [html.Iframe(id = 'map', srcDoc = None, width = "50%", height = "500", style={'display': 'inline-block'}),
+                             dcc.Graph(id="graph2",style={'display': 'inline-block', 'height' : "600"})]),
+        dcc.Interval(
+            id='interval-component',
+            interval=UPDATE_INTERVAL
+            n_intervals=0
+        ) 
     ]
 )
 
 
-#@app.callback(dash.dependencies.Output('map', 'srcDoc'))
-def update_map():
-    print("Dai che vaaaaa")
-#    return open('ROme.html', 'r').read()
-
-schedule.every(10).seconds.do(update_map)
-
-def my_thread_proc():
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-
-t = threading.Thread(target = my_thread_proc, daemon = True)
-
 if __name__ == "__main__":
     app.run_server(debug=True)
-    t.run()
-
