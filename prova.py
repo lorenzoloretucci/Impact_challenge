@@ -11,6 +11,7 @@ import configparser
 import os
 import folium
 
+
 curr_dir = os.getcwd()
 config_file = os.path.join(curr_dir, 'configs.ini')
 config = configparser.ConfigParser()
@@ -49,14 +50,16 @@ def update_map(n):
 
     rome_map = folium.Map(location = START_COORDS, title = "Rome", zoom_start = 16, min_zoom = 16, max_zoom = 16)
 
+    #take trucks position, add it to maps
     for truck in GARBAGE_TRUCKS:
         truck_pos = GARBAGE_TRUCKS[truck][n % len(GARBAGE_TRUCKS[truck])][0], GARBAGE_TRUCKS[truck][n % len(GARBAGE_TRUCKS[truck])][1]
+
         folium.Marker(location=[truck_pos[0], truck_pos[1]],
                                 icon = folium.features.CustomIcon("assets\garbagetruck.png",
                                                                    icon_size=(25, 25)),
                                                                    popup=f'Garbage truck #{truck}'
                      ).add_to(rome_map)
-
+        #add garbage bins maps
         for p in POSITIONS[truck]: 
             folium.Marker(location=[p[0], p[1]],
                           icon = folium.features.CustomIcon("assets\dustbin.png",
@@ -92,7 +95,8 @@ def update_output(n_clicks, value):
         SHOW_ROUTES[truck_n] = True
     return ''
 
-#Dataframe 
+
+###############  Dataframe ############################## 
 data = {"Report_id":[000,111,222,333], 
         "Truck_id":[234,567,876,766],
          "Type":['Report', "Issiue", "NaN", "Injury"],
@@ -100,50 +104,83 @@ data = {"Report_id":[000,111,222,333],
 
 df = pd.DataFrame(data)
 
+df_bin = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
+###########################################################
 
 app.layout = html.Div(
     #MAIN
             children = [    
                 #header#
                         html.Div(children = [
-                                            html.H1("UnWaste!"),
-                                            html.P('Demo dashboard')
+                                            html.H1("UnWaste!", className = "header-title"),
+                                            html.P('Demo dashboard', className = 'header-description')
                                             ],
-                                className = 'Header'
+                                className = 'header'
                                 ),
-                #Body#
+                #Body1#
                         html.Div(children = [
                                             #Map#
                                             html.Div([
                                                         html.H3('Path Map'),
-                                                        html.Iframe(id = 'map', srcDoc = None, height = "500", width = '500'),
-                                                        dcc.Input(id='input-on-submit', type='text', value='0'),
-                                                        html.Button('Submit', id='submit-val', n_clicks=0),
-                                                        html.Div(id='ignore-me', hidden=True)
+                                                        html.Iframe(id = 'map', srcDoc = None, height = "305", width = '500'),
+                                            #Button div
+                                                        html.Div([dcc.Dropdown(id='input-on-submit', options = [{"label":"truck1", "value": "0" }], value='0'),
+                                                                    html.Button('Submit', id='submit-val', n_clicks=0),
+                                                                    html.Div(id='ignore-me', hidden=True)
+                                                                 ])
                                                      ],
-                                                        style={"float":"left", 'width':500, 'height': 500, "margin":100},
+                                                        
                                                     className = "Map"),
                                         
                                             #Report#
                                             html.Div([
-                                                        # reportTitle
+                                                    # reportTitle
                                                     html.H3('Real-Time Reports'),
                                                      #Table
                                                     dash_table.DataTable(id='table',columns=[{"name": i, "id": i} for i in df.columns],data=df.to_dict('records')),
                                                     
                                                     ],
-                                                    style={"float":"left", 'width':500, 'height': 500, "margin": 100}),
+                                                    className="Report"
+                                                    ),
                                             html.Div([
                                                 dcc.Interval(
                                                 id='interval-component',
                                                 interval=UPDATE_INTERVAL,
                                                 n_intervals=0)
                                                     ]),
+
+                    
+                                            
                                             ],
                                             
-                                        className = 'Body',
-                                        ),      
-                        ]
+                                        className = 'wrapper'),
+                        ## body 2
+                        html.Div(children = [
+                                                dash_table.DataTable(
+                                                                        id='datatable-interactivity',
+                                                                        columns=[
+                                                                            {"name": i, "id": i, "deletable": True, "selectable": True} for i in df_bin.columns
+                                                                        ],
+                                                                        data=df.to_dict('records'),
+                                                                        
+                                                                        
+                                                                        row_selectable="multi",
+                                                                        
+                                                                        selected_columns=[],
+                                                                        selected_rows=[],
+                                                                        page_action="native",
+                                                                        page_current= 0,
+                                                                        page_size= 10,
+                                                                    ),
+                                                    html.Div(id='datatable-interactivity-container')
+
+
+
+                                                ], 
+                                                className = "wrapper"),
+                                  
+                        ],
+className="HTML"
 )
 if __name__ == "__main__":
     app.run_server(debug=True)
