@@ -1,5 +1,8 @@
-# Impact_challenge
-This is the code for UnWaste! project :) 
+<img src="/assets/unwaste_logo!.png" width="200" height="200"> 
+
+# UnWaste!
+
+Code for UnWaste! project :) 
 
 To use it
 ```
