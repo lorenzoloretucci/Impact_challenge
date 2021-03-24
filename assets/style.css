@@ -3,21 +3,8 @@ body {
     margin: 0;
     background-color: #F7F7F7;
 }
-
-.Map {
-    flex: 1;
-    border: 2px solid black;
     
-    
-      }
-
-.Report {
-     
-    flex: 1; 
-    margin-left: 50px;
-    border: 2px solid black;}   
-    
-    
+   
 .header {
     background-color: #90beab   ;
     height: 150px;
@@ -47,18 +34,46 @@ body {
     max-width: 384px;
 }
 
+
+.HTML{
+    margin-bottom: 50px;
+
+}
+
 .wrapper {
     display: flex;
     margin-right: auto;
     margin-left: auto;
-    max-width: 1024px;
-    padding-right: 10px;
-    padding-left: 10px;
+    padding-right: 80px;
+    padding-left: 80px;
     margin-top: 32px;
 
 }
 
-.card {
-    margin-bottom: 24px;
-    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
+
+.Map {
+    flex: 1;
+    border: 2px solid black;
+      }
+.inframe_map {
+        margin-left : 120px; 
+        margin-bottom: 20px;
+    }
+
+.Report {
+    flex: 1; 
+    margin-left: 50px;
+    border: 2px solid black
+        }   
+
+.left-stats{
+    flex:1 ; 
+    border: 2px solid black
 }
+
+.right-stats{
+    flex:1 ; 
+    margin-left: 40px;
+    border: 2px solid black
+}
+

@@ -10,6 +10,7 @@ import json
 import configparser
 import os
 import folium
+import plotly.express as px
 
 
 curr_dir = os.getcwd()
@@ -95,6 +96,28 @@ def update_output(n_clicks, value):
         SHOW_ROUTES[truck_n] = True
     return ''
 
+##### callback for left-stats #####
+@app.callback(
+    Output("pie-chart", "figure"), 
+    [Input("names", "value"), 
+     Input("values", "value")])
+def generate_chart(names, values):
+    fig = px.pie(df_left, values=values, names=names)
+    return fig
+
+##### callback for right- stats ###
+@app.callback(
+    Output("graph", "figure"), 
+    [Input("mean", "value"), 
+     Input("std", "value")])
+def display_color(mean, std):
+    data = np.random.normal(mean, std, size=500)
+    fig = px.histogram(data, nbins=30, range_x=[-10, 10])
+    return fig
+
+
+
+
 
 ###############  Dataframe ############################## 
 data = {"Report_id":[000,111,222,333], 
@@ -104,8 +127,13 @@ data = {"Report_id":[000,111,222,333],
 
 df = pd.DataFrame(data)
 
-df_bin = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
+np.random.seed(2020)
+
+data_left = {'Fuel':[]}
+
+df_left = px.data.tips()
 ###########################################################
+
 
 app.layout = html.Div(
     #MAIN
@@ -122,7 +150,7 @@ app.layout = html.Div(
                                             #Map#
                                             html.Div([
                                                         html.H3('Path Map'),
-                                                        html.Iframe(id = 'map', srcDoc = None, height = "305", width = '500'),
+                                                        html.Iframe(id = 'map', srcDoc = None, height = "305", width = '500', className = 'inframe_map' ),
                                             #Button div
                                                         html.Div([dcc.Dropdown(id='input-on-submit', options = [{"label":"truck1", "value": "0" }], value='0'),
                                                                     html.Button('Submit', id='submit-val', n_clicks=0),
@@ -156,31 +184,57 @@ app.layout = html.Div(
                                         className = 'wrapper'),
                         ## body 2
                         html.Div(children = [
-                                                dash_table.DataTable(
-                                                                        id='datatable-interactivity',
-                                                                        columns=[
-                                                                            {"name": i, "id": i, "deletable": True, "selectable": True} for i in df_bin.columns
-                                                                        ],
-                                                                        data=df.to_dict('records'),
-                                                                        
-                                                                        
-                                                                        row_selectable="multi",
-                                                                        
-                                                                        selected_columns=[],
-                                                                        selected_rows=[],
-                                                                        page_action="native",
-                                                                        page_current= 0,
-                                                                        page_size= 10,
-                                                                    ),
-                                                    html.Div(id='datatable-interactivity-container')
+                                            ##left-stats
+                                            html.Div([ 
+                                                    html.H3('Real-time Trucks stats'),
+                                                    html.P("Names:"),
+                                                    dcc.Dropdown(
+                                                                id='names', 
+                                                                value='day', 
+                                                                options=[{'value': x, 'label': x} for x in ['smoker', 'day', 'time', 'sex']],
+                                                                clearable=False
+                                                                ),
+                                                    html.P("Values:"),
+                                                    dcc.Dropdown(
+                                                                id='values', 
+                                                                value='total_bill', 
+                                                                options=[{'value': x, 'label': x} for x in ['total_bill', 'tip', 'size']],
+                                                                clearable=False
+                                                                ),
+                                                    
+                                                    dcc.Graph(id="pie-chart"),
+                                                  
+                                                    ],
+                                                    className = "left-stats"),
+                                            #right Stats
+                                            html.Div([
+                                                    html.H3('Real-Time bin stats'),
+                                                       dcc.Graph(id="graph"),
+                                                            html.P("Mean:"),
+                                                            dcc.Slider(id="mean", min=-3, max=3, value=0, 
+                                                                    marks={-3: '-3', 3: '3'}),
+                                                            html.P("Standard Deviation:"),
+                                                            dcc.Slider(id="std", min=1, max=3, value=1, 
+                                                                    marks={1: '1', 3: '3'}),
+
+                                                    ],
+                                                    className="right-stats")
+                                            
+
+                            
 
 
 
-                                                ], 
-                                                className = "wrapper"),
+                                            ], 
+                                            className = "wrapper"),
                                   
                         ],
 className="HTML"
 )
+
+
+
+
+
 if __name__ == "__main__":
     app.run_server(debug=True)
