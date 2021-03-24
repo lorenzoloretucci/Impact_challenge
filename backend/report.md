@@ -1,5 +1,7 @@
 **Data Generation**: \
-In this simple model we suppose that each bin has a binary signal 0 for empty and 1 for full. These reports can come from QR codes, smart bins, etc. For now se suppose that the signals are all uncorrelated: for each bin a probability of success p is drawn uniformely at random each time and from it a time series of zeros and ones is generated. \
+In this simple model we suppose that each bin has a binary signal 0 for empty and 1 for full. These reports can come from QR codes, smart bins, etc. For now se suppose that the signals are all uncorrelated: for each bin a probability of success p is drawn uniformely at random each time and from it a time series of zeros and ones is generated. Optionally
+to simulate a more realistic scenario it is possible also to generate additional features, that would represent other type of data, e.g., daily estimated garbage for that bin for
+that particular day, or any other information. In this case, since we don't have access to these type of data we generate features containing all ones.\
 **Model training**: \
 Given these observations we train a NN model in an autoregressive fashion, i.e., we want to classify the state of one bin at time t given the observations of that bin at all the previous times. To do so we can use a simple RNN model, in our case this is composed by 1 LSTM and 2 fully connected layers. \
 **Predictions**: \
