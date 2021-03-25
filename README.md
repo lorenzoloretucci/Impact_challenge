@@ -10,4 +10,5 @@ To use it
 ```
 pip install -r requirements.txt
 ```
----
+- Run prova.py
+- Run local host
