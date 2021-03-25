@@ -11,7 +11,10 @@ import configparser
 import os
 import folium
 import plotly.express as px
+import random
 
+random.seed(123)
+np.random.seed(123)
 
 curr_dir = os.getcwd()
 config_file = os.path.join(curr_dir, 'configs.ini')
@@ -102,17 +105,17 @@ def update_output(n_clicks, value):
     [Input("names", "value"), 
      Input("values", "value")])
 def generate_chart(names, values):
-    fig = px.pie(df_left, values=values, names=names)
+    fig = px.pie(df_left, values= values, names= names)
     return fig
+
 
 ##### callback for right- stats ###
 @app.callback(
-    Output("graph", "figure"), 
-    [Input("mean", "value"), 
-     Input("std", "value")])
-def display_color(mean, std):
-    data = np.random.normal(mean, std, size=500)
-    fig = px.histogram(data, nbins=30, range_x=[-10, 10])
+    Output("histo", "figure"), 
+    [Input("waste", "value")])
+def display_color(waste):
+    waste_type = df_right['waste'] == waste
+    fig = px.bar(df_right[waste_type], x ='day', y = 'total_waste')
     return fig
 
 
@@ -127,11 +130,30 @@ data = {"Report_id":[000,111,222,333],
 
 df = pd.DataFrame(data)
 
-np.random.seed(2020)
+choose_len = 20
 
-data_left = {'Fuel':[]}
+#####  Trucks Dataframe ###
+condition_fuel_mount =['Empty', 'Full', '50%']
+TIME = ["morning", "evening", "afternoon"]
 
-df_left = px.data.tips()
+data_left = {'Fuel_L':[random.randrange(1,80,1) for i in range(choose_len)],
+             "mount_mc": [random.randrange(1,15,1) for i in range(choose_len)],
+             "truck_fuel_situation": [random.choice(condition_fuel_mount) for i in range(choose_len)],
+             "time": [random.choice(TIME) for i in range(choose_len)]}
+
+df_left = pd.DataFrame(data_left)
+
+####### Waste dataframe 
+waste_type = ['PET', 'alluminium', "paper", "glassware", "metalware", "undifferentiated"]
+TIME_week = ['Monday',"Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Suday"]
+
+data_right = {"waste": [random.choice(waste_type) for i in range(choose_len)],
+            "total_waste":[random.randrange(1,648,1) for i in range(choose_len)],
+            "day": [random.choice(TIME_week) for i in range(choose_len)]}
+
+
+df_right = pd.DataFrame(data_right)
+wastes = df_right.waste.unique()
 ###########################################################
 
 
@@ -190,15 +212,15 @@ app.layout = html.Div(
                                                     html.P("Names:"),
                                                     dcc.Dropdown(
                                                                 id='names', 
-                                                                value='day', 
-                                                                options=[{'value': x, 'label': x} for x in ['smoker', 'day', 'time', 'sex']],
+                                                                value='time', 
+                                                                options=[{'value': x, 'label': x} for x in ['truck_fuel_situation', 'time']],
                                                                 clearable=False
                                                                 ),
                                                     html.P("Values:"),
                                                     dcc.Dropdown(
                                                                 id='values', 
-                                                                value='total_bill', 
-                                                                options=[{'value': x, 'label': x} for x in ['total_bill', 'tip', 'size']],
+                                                                value='Fuel_L', 
+                                                                options=[{'value': x, 'label': x} for x in ['Fuel_L', 'mount_mc']],
                                                                 clearable=False
                                                                 ),
                                                     
@@ -209,13 +231,17 @@ app.layout = html.Div(
                                             #right Stats
                                             html.Div([
                                                     html.H3('Real-Time bin stats'),
-                                                       dcc.Graph(id="graph"),
-                                                            html.P("Mean:"),
-                                                            dcc.Slider(id="mean", min=-3, max=3, value=0, 
-                                                                    marks={-3: '-3', 3: '3'}),
-                                                            html.P("Standard Deviation:"),
-                                                            dcc.Slider(id="std", min=1, max=3, value=1, 
-                                                                    marks={1: '1', 3: '3'}),
+                                        
+                                                    html.P("Waste:"),
+                                                    dcc.Dropdown(
+                                                                id='waste', 
+                                                                value='PET', 
+                                                                options=[{'value': x, 'label': x} for x in wastes],
+                                                                clearable=False
+                                                                ),
+
+                                                       dcc.Graph(id="histo"),
+                                                            
 
                                                     ],
                                                     className="right-stats")
