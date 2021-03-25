@@ -7,17 +7,12 @@ body {
    
 .header {
     background-color: #90beab   ;
-    height: 150px;
+    height: 100px;
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
 
-.header-emoji {
-    font-size: 48px;
-    margin: 0 auto;
-    text-align: center;
-}
 
 .header-title {
     color: #FFFFFF;
@@ -34,6 +29,13 @@ body {
     max-width: 384px;
 }
 
+.wintitle{
+    font-size: 18px;
+    text-align: center;
+    margin: 2px auto 20px
+
+
+}
 
 .HTML{
     margin-bottom: 50px;
@@ -46,34 +48,41 @@ body {
     margin-left: auto;
     padding-right: 80px;
     padding-left: 80px;
-    margin-top: 32px;
+    margin-top: 10px;
 
 }
 
 
 .Map {
     flex: 1;
-    border: 2px solid black;
+    border: 7px solid #90beab ;
+    padding:10px
       }
 .inframe_map {
-        margin-left : 120px; 
-        margin-bottom: 20px;
+        width: 600px;
+        height: 320px;
+        margin-left: 60px;
+
     }
 
 .Report {
     flex: 1; 
     margin-left: 50px;
-    border: 2px solid black
+    border: 7px solid #90beab ;
+    padding: 10px
         }   
 
 .left-stats{
     flex:1 ; 
-    border: 2px solid black
+    border: 7px solid #90beab ;
+    padding:10px
+
 }
 
 .right-stats{
     flex:1 ; 
-    margin-left: 40px;
-    border: 2px solid black
+    margin-left: 50px;
+    border: 7px solid #90beab ;
+    padding: 10px
 }
 

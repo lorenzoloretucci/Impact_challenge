@@ -32,21 +32,60 @@ app.title = "UnWaste! Project"
 
 START_COORDS = (41.89117549369146, 12.502362854652286)
 # positions are divided in groups for each garbage-truck
-POSITIONS = {0: [(41.8908906679924, 12.502572097053521), 
-            (41.891579262511144, 12.502176550683817), 
-            (41.8924103430201, 12.503031390817107), 
-            (41.893027676367694, 12.501927753222729)],
+POSITIONS = {0: [(41.89386551419458, 12.501966140302937),
+                    (41.89257171020426, 12.501601359887946),
+                    (41.8934182762729, 12.501150748787078),
+                    (41.892747413518585, 12.50024952658534),
+                    (41.892475871829106, 12.501322410158838),
+                    (41.892747413518585, 12.502438209075272),
+                    (41.89300298111296, 12.501837394274116),
+                    (41.89268352146019, 12.5032750582626),
+                    (41.89279533252039, 12.50404753443552),
+                    (41.89292311634958, 12.504905841294317),
+                    (41.89201265098866, 12.504691264579616),
+                    (41.89332243916796, 12.50394024607817),
+                    (41.89253976409517, 12.498597285882155)
+                    ],
             1: [
-                (42.8924103430201, 12.503031390817107)
-            ]}
-GARBAGE_TRUCKS = {0: [(41.89094733558171, 12.505344489064024),
-                      (41.890840034189985, 12.504987924351767),
-                      (41.890631075681256, 12.504282384995024),
-                      (41.89046164764188, 12.503819614718148)],
-                    1: [(41.890631075681256, 12.504282384995024),
-                        (41.89094733558171, 12.505344489064024),
-                        (41.89046164764188, 12.503819614718148),
-                        (41.890840034189985, 12.504987924351767)]}
+                (41.89067088890724, 12.502566955104093),
+                (41.891597346689515, 12.502116344003225),
+                (41.89177305268408, 12.50003494987064),
+                (41.891405666871506, 12.501107833444138),
+                (41.89067088890724, 12.501300952487366),
+                (41.89174110617557, 12.50409044977846),
+                (41.891293853378684, 12.499391219726544),
+                (41.891261906630504, 12.498726031910977),
+                (41.89011181305501, 12.50421919580728),
+                (41.890638941847506, 12.505485198424006),
+                (41.891868892113756, 12.502481124418214),
+                            ]}
+GARBAGE_TRUCKS = {0: [(41.89386551419458, 12.501966140302937),
+                    (41.89257171020426, 12.501601359887946),
+                    (41.8934182762729, 12.501150748787078),
+                    (41.892747413518585, 12.50024952658534),
+                    (41.892475871829106, 12.501322410158838),
+                    (41.892747413518585, 12.502438209075272),
+                    (41.89300298111296, 12.501837394274116),
+                    (41.89268352146019, 12.5032750582626),
+                    (41.89279533252039, 12.50404753443552),
+                    (41.89292311634958, 12.504905841294317),
+                    (41.89201265098866, 12.504691264579616),
+                    (41.89332243916796, 12.50394024607817),
+                    (41.89253976409517, 12.498597285882155)
+                    ],
+                    1: [
+                        (41.89067088890724, 12.502566955104093),
+                        (41.891597346689515, 12.502116344003225),
+                        (41.89177305268408, 12.50003494987064),
+                        (41.891405666871506, 12.501107833444138),
+                        (41.89067088890724, 12.501300952487366),
+                        (41.89174110617557, 12.50409044977846),
+                        (41.891293853378684, 12.499391219726544),
+                        (41.891261906630504, 12.498726031910977),
+                        (41.89011181305501, 12.50421919580728),
+                        (41.890638941847506, 12.505485198424006),
+                        (41.891868892113756, 12.502481124418214),
+                            ]}
 
 GARBAGE_LABELS = []
 for k in GARBAGE_TRUCKS.keys():
@@ -63,23 +102,31 @@ clnt = client.Client(key=API_KEY) # Create client with api key
 def update_map(n):
     global START_COORDS, POSITIONS, GARBAGE_TRUCKS, SHOW_ROUTES
 
-    rome_map = folium.Map(location = START_COORDS, title = "Rome", zoom_start = 16, min_zoom = 16, max_zoom = 16)
+    rome_map = folium.Map(location = START_COORDS, title = "Rome", zoom_start = 16, min_zoom = 16, max_zoom = 18)
 
     #take trucks position, add it to maps
     for truck in GARBAGE_TRUCKS:
+
         truck_pos = GARBAGE_TRUCKS[truck][n % len(GARBAGE_TRUCKS[truck])][0], GARBAGE_TRUCKS[truck][n % len(GARBAGE_TRUCKS[truck])][1]
 
         folium.Marker(location=[truck_pos[0], truck_pos[1]],
                                 icon = folium.features.CustomIcon("assets\garbagetruck.png",
-                                                                   icon_size=(25, 25)),
+                                                                   icon_size=(35, 35)),
                                                                    popup=f'Garbage truck #{truck}'
                      ).add_to(rome_map)
         #add garbage bins maps
         for p in POSITIONS[truck]: 
-            folium.Marker(location=[p[0], p[1]],
+            if truck == 0:
+                folium.Marker(location=[p[0], p[1]],
                           icon = folium.features.CustomIcon("assets\dustbin.png",
-                                                            icon_size=(30, 30))
+                                                            icon_size=(20, 20))
                           ).add_to(rome_map)
+            else:
+                folium.Marker(location=[p[0], p[1]],
+                          icon = folium.features.CustomIcon(r"assets\bluebin.png",
+                                                            icon_size=(20, 20))
+                          ).add_to(rome_map) 
+
 
         # get directions
         if False: #SHOW_ROUTES[truck]:  # decomment to use API; TODO: add checkbox to toggle route drawing
@@ -182,8 +229,8 @@ app.layout = html.Div(
                         html.Div(children = [
                                             #Map#
                                             html.Div([
-                                                        html.H3('Path Map'),
-                                                        html.Iframe(id = 'map', srcDoc = None, height = "305", width = '500', className = 'inframe_map' ),
+                                                        html.H3('Path Map',  className = 'wintitle'),
+                                                        html.Iframe(id = 'map', srcDoc = None, className = 'inframe_map' ),
                                             #Button div
                                                         html.Div([dcc.Dropdown(id='input-on-submit', options = GARBAGE_LABELS, value='0'),
                                                                     html.Button('Submit', id='submit-val', n_clicks=0),
@@ -196,7 +243,7 @@ app.layout = html.Div(
                                             #Report#
                                             html.Div([
                                                     # reportTitle
-                                                    html.H3('Real-Time Reports'),
+                                                    html.H3('Real-Time Reports',  className = 'wintitle'),
                                                      #Table
                                                     dash_table.DataTable(id='table',columns=[{"name": i, "id": i} for i in df.columns],data=df.to_dict('records')),
                                                     
@@ -219,11 +266,11 @@ app.layout = html.Div(
                         html.Div(children = [
                                             ##left-stats
                                             html.Div([ 
-                                                    html.H3('Real-time Trucks stats'),
+                                                    html.H3('Real-time Trucks stats', className = 'wintitle'),
                                                     html.P("Names:"),
                                                     dcc.Dropdown(
                                                                 id='names', 
-                                                                value='time', 
+                                                                value='truck_fuel_situation', 
                                                                 options=[{'value': x, 'label': x} for x in ['truck_fuel_situation', 'time']],
                                                                 clearable=False
                                                                 ),
@@ -241,7 +288,7 @@ app.layout = html.Div(
                                                     className = "left-stats"),
                                             #right Stats
                                             html.Div([
-                                                    html.H3('Real-Time bin stats'),
+                                                    html.H3('Real-Time bin stats',  className = 'wintitle'),
                                         
                                                     html.P("Waste:"),
                                                     dcc.Dropdown(
