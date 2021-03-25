@@ -32,12 +32,23 @@ START_COORDS = (41.89117549369146, 12.502362854652286)
 POSITIONS = {0: [(41.8908906679924, 12.502572097053521), 
             (41.891579262511144, 12.502176550683817), 
             (41.8924103430201, 12.503031390817107), 
-            (41.893027676367694, 12.501927753222729)]}
+            (41.893027676367694, 12.501927753222729)],
+            1: [
+                (42.8924103430201, 12.503031390817107)
+            ]}
 GARBAGE_TRUCKS = {0: [(41.89094733558171, 12.505344489064024),
                       (41.890840034189985, 12.504987924351767),
                       (41.890631075681256, 12.504282384995024),
-                      (41.89046164764188, 12.503819614718148)]}
-SHOW_ROUTES = {0: False}
+                      (41.89046164764188, 12.503819614718148)],
+                    1: [(41.890631075681256, 12.504282384995024),
+                        (41.89094733558171, 12.505344489064024),
+                        (41.89046164764188, 12.503819614718148),
+                        (41.890840034189985, 12.504987924351767)]}
+
+GARBAGE_LABELS = []
+for k in GARBAGE_TRUCKS.keys():
+    GARBAGE_LABELS.append({'label': f'Truck #{k + 1}', 'value': str(k)})
+SHOW_ROUTES = {0: False, 1: False}
 
 
 clnt = client.Client(key=API_KEY) # Create client with api key
@@ -68,7 +79,7 @@ def update_map(n):
                           ).add_to(rome_map)
 
         # get directions
-        if SHOW_ROUTES[truck]:
+        if False: #SHOW_ROUTES[truck]:  # decomment to use API; TODO: add checkbox to toggle route drawing
             coordinates = [[truck_pos[1], truck_pos[0]]] + [[p[1], p[0]] for p in POSITIONS[truck]]
             route = clnt.directions(coordinates=coordinates,
                                         profile='driving-car',
@@ -152,7 +163,7 @@ app.layout = html.Div(
                                                         html.H3('Path Map'),
                                                         html.Iframe(id = 'map', srcDoc = None, height = "305", width = '500', className = 'inframe_map' ),
                                             #Button div
-                                                        html.Div([dcc.Dropdown(id='input-on-submit', options = [{"label":"truck1", "value": "0" }], value='0'),
+                                                        html.Div([dcc.Dropdown(id='input-on-submit', options = GARBAGE_LABELS, value='0'),
                                                                     html.Button('Submit', id='submit-val', n_clicks=0),
                                                                     html.Div(id='ignore-me', hidden=True)
                                                                  ])
