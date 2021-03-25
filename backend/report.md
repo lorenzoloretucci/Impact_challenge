@@ -6,6 +6,6 @@ that particular day, or any other information. In this case, since we don't have
 
 **Model training**: \
 The model depends on the type of available features. If we have only binary observations than the model can be trained in an autoregressive fashion, where we want to predict the state of each bin at time t given all the past observations of that bin. This way is relatively straightforward and an illustration can be seen in the figure below:
-![alt text] (https://www.tensorflow.org/tutorials/structured_data/images/lstm_many_window.png)\
+![Screenshot] (autoregressive\ simple.png)\
 **Predictions**: \
 After the model is trained the predictions are made by generating a test set in the same way of the train and the predictions are made by sampling from the predicted distribution, i.e. if for a bin the model predicts 0.80 (model confidence that the state of the bin is full is 80%) then the prediction for the bin is a Bernoulli random variable with parameter 0.80. This is usually done in the context of time series classification (in NLP for example) since it is not always true that the best predicted time series is obtain by picking the class with highest confidence at each step (for this reason usually approaches like our or more sofisticated like the beam search are taken).
