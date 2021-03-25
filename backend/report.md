@@ -13,7 +13,7 @@ The model depends on the type of available features. If we have only binary obse
 In the case we have features the things become more complicated. For this we need to train a model that takes in input a vector and gives in output a binary observation thus it is 
 impossible to train an autoregressive model, since we cannot feed back the output to the input. For this reason we can train a model that takes a number of "step" vectors and predicts the binary state on the next "step" timestamps. An illustration is shown below:
 <p align="center">
-  <img width="460" height="300" src="https://github.com/lorenzoloretucci/Impact_challenge/blob/main/backend/autoregressive%20simple.PNG">
+  <img width="460" height="300" src="https://github.com/lorenzoloretucci/Impact_challenge/blob/main/backend/autoregressive%20features.PNG">
 </p>
 \
 **Predictions**: \
