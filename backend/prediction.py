@@ -44,11 +44,11 @@ class MakePrediction:
 
         data = pd.merge(obs, feat, on='id')
 
-        obs = data.iloc[:, 1:11].values
-        feat = data.iloc[:,11:].values
+        obs = data.iloc[:, 1:N_STEP+1].values
+        feat = data.iloc[:,N_STEP+1:].values
 
-        obs = obs.reshape(-1, 10, 1)
-        feat = feat.reshape(-1, 10, 1 )
+        obs = obs.reshape(-1, N_STEP, 1)
+        feat = feat.reshape(-1, N_STEP, 1 )
 
         self.data = np.concatenate((obs, feat), axis=2)
 
