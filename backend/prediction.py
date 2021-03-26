@@ -52,15 +52,17 @@ class MakePrediction:
 
         self.data = np.concatenate((obs, feat), axis=2)
 
-    def prediction(self):
+    def prediction(self, n_pred=1):
         ''' 
         Computes the predictions using the loaded model.
+        Returns the prediction for n time stamps, the parameter
+        should be less than N_STEP.
 
         '''
         preds = self.model(self.data, training=False)
         vec_draw_bernoulli = np.vectorize(self.draw_bernoulli)
         preds = vec_draw_bernoulli(preds)
-        return preds
+        return preds[:, :n_pred]
     
     def load_model(self):
         '''
