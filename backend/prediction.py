@@ -1,7 +1,8 @@
 from backend.models import rnn_model
 
-N_STEP = 10
-N_FEAT = 2
+
+N_STEP = 10 # number of time stamps used to make the prediction
+N_FEAT = 2 # number of features in our toy dataset
 
 class MakePrediction:
 
