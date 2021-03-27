@@ -9,7 +9,7 @@ def kmeans_subdivision(bin_ids, DIR_PATH, k):
     Function that takes the ids of the bins and splits them into 
     zones by performing a KMeans clustering. Takes in input the array of
     bin ids, accesses the DB and takes coordinates and performs the 
-    clustering. Returns an array of (bin_idx, cluster_labels).
+    clustering. Returns a dictionary of the form {zone_id:[bin_id1, bin_id2,...], ...}.
     '''
 
     data = pd.read_csv(DIR_PATH + '/DATABASE/coords_groups.csv')
