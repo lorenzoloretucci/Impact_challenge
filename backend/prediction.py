@@ -31,7 +31,6 @@ class MakePrediction:
         prediction is (0.2, 0.8) it means that the prediction
         is 1 with 80% confidence, and we then extract a Ber(0.8)
         random variable.
-
         '''
         return np.random.binomial(n=1, p=p, size=1)
 
@@ -54,21 +53,31 @@ class MakePrediction:
         self.data = np.concatenate((obs, feat), axis=2)
 
     def prediction(self, n_pred=1):
+
         ''' 
         Computes the predictions using the loaded model.
         Returns the prediction for n time stamps, the parameter
         should be less than N_STEP.
 
         '''
+
         preds = self.model(self.data, training=False)
         vec_draw_bernoulli = np.vectorize(self.draw_bernoulli)
         preds = vec_draw_bernoulli(preds)
-        return preds[:, :n_pred]
+        preds = preds[:, :n_pred]
+        dic_preds = {}
+
+        for t in range(n_pred):
+            temp = preds[:,t]
+            dic_preds['t'+str(t)] = np.where(temp)[0]
+
+        return dic_preds['t0']
     
     def load_model(self):
+
         '''
         Loads the model with weights that are stored in our DB.
         '''
+
         self.model = rnn_model(N_FEAT, N_STEP)
         self.model.load_weights(self.w_path)
-
