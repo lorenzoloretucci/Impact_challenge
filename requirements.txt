@@ -7,3 +7,5 @@ tensorflow
 networkx
 geopy
 sklearn
+collections
+itertools
