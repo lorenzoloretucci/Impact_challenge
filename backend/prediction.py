@@ -1,5 +1,6 @@
 from backend.models import rnn_model
 import pandas as pd
+import numpy as np
 
 N_STEP = 10 # number of time stamps used to make the prediction
 N_FEAT = 2 # number of features in our toy dataset
