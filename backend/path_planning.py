@@ -3,8 +3,12 @@ import geopy.distance
 import numpy as np
 import pandas as pd
 
-#takes as input the graph G and a node a
+
 def cammino(a,G):
+    '''
+    Takes in input the starting node a,  a nx.Graph object and computes
+    the shortest walk passing for all nodes.
+    '''
     list_nodes = list(G.nodes)
     path = []
     path.append(a)
@@ -21,8 +25,13 @@ def cammino(a,G):
     return path
     
     
-#It takes as input a dictionary that has the various clusters as keys and the nodes associated with each cluster as values and the path of the database
 def path_planning(clust, centers, DIR_PATH):
+    '''
+    takes as input a dictionary that has the various clusters as keys 
+    and the nodes associated with each cluster as values and the path 
+    of the database. Returns a dict containing the paths and the tracks'
+    positions.
+    '''
     trucks_assign = truck_cluster_assignments(DIR_PATH, centers)
 
     df = pd.read_csv(DIR_PATH + '/DATABASE/coords_groups.csv')
