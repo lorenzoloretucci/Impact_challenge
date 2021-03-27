@@ -2,7 +2,7 @@ import networkx as nx
 import geopy.distance
 import numpy as np
 import pandas as pd
-
+from itertools import combinations, permutations
 
 def cammino(a,G):
     '''
@@ -76,9 +76,9 @@ def truck_cluster_assignments(DIR_PATH, centers):
     
     '''
     trucks_coords =  pd.read_csv(DIR_PATH + '/DATABASE/trucks_coords.csv')
-    trucks_coords['available'] = [1,0,0,1,1,0]
+    
     truck_ids = trucks_coords.loc[trucks_coords['available']==1, 'truck_id'].values
-    trucks_coords = trucks_coords.loc[ trucks_coords['available']==1, [' latitude', ' longitude']].values
+    trucks_coords = trucks_coords.loc[ trucks_coords['available']==1, ['latitude', 'longitude']].values
 
     dists = []
 
