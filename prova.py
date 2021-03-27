@@ -12,6 +12,7 @@ import os
 import folium
 import plotly.express as px
 import random
+from backend.example import get_paths
 
 random.seed(123)
 np.random.seed(123)
@@ -32,33 +33,8 @@ app.title = "UnWaste! Project"
 
 START_COORDS = (41.89117549369146, 12.502362854652286)
 # positions are divided in groups for each garbage-truck
-POSITIONS = {0: [(41.89386551419458, 12.501966140302937),
-                    (41.89257171020426, 12.501601359887946),
-                    (41.8934182762729, 12.501150748787078),
-                    (41.892747413518585, 12.50024952658534),
-                    (41.892475871829106, 12.501322410158838),
-                    (41.892747413518585, 12.502438209075272),
-                    (41.89300298111296, 12.501837394274116),
-                    (41.89268352146019, 12.5032750582626),
-                    (41.89279533252039, 12.50404753443552),
-                    (41.89292311634958, 12.504905841294317),
-                    (41.89201265098866, 12.504691264579616),
-                    (41.89332243916796, 12.50394024607817),
-                    (41.89253976409517, 12.498597285882155)
-                    ],
-            1: [
-                (41.89067088890724, 12.502566955104093),
-                (41.891597346689515, 12.502116344003225),
-                (41.89177305268408, 12.50003494987064),
-                (41.891405666871506, 12.501107833444138),
-                (41.89067088890724, 12.501300952487366),
-                (41.89174110617557, 12.50409044977846),
-                (41.891293853378684, 12.499391219726544),
-                (41.891261906630504, 12.498726031910977),
-                (41.89011181305501, 12.50421919580728),
-                (41.890638941847506, 12.505485198424006),
-                (41.891868892113756, 12.502481124418214),
-                            ]}
+df = pd.read_csv('./DATABASE/coords_groups.csv')
+POSITIONS = df[['latitude','longitude']].values
 GARBAGE_TRUCKS = {0: [(41.89386551419458, 12.501966140302937),
                     (41.89257171020426, 12.501601359887946),
                     (41.8934182762729, 12.501150748787078),
@@ -92,6 +68,8 @@ for k in GARBAGE_TRUCKS.keys():
     GARBAGE_LABELS.append({'label': f'Truck #{k + 1}', 'value': str(k)})
 SHOW_ROUTES = {0: False, 1: False}
 
+# precompute paths
+paths = get_paths(len(GARBAGE_TRUCKS))
 
 clnt = client.Client(key=API_KEY) # Create client with api key
 
@@ -100,9 +78,16 @@ clnt = client.Client(key=API_KEY) # Create client with api key
 @app.callback(Output('map', 'srcDoc'),
               Input('interval-component', 'n_intervals'))  # add an input here to load the pathon the map at a user's notice
 def update_map(n):
-    global START_COORDS, POSITIONS, GARBAGE_TRUCKS, SHOW_ROUTES
+    global START_COORDS, POSITIONS, GARBAGE_TRUCKS, SHOW_ROUTES, paths
 
     rome_map = folium.Map(location = START_COORDS, title = "Rome", zoom_start = 16, min_zoom = 16, max_zoom = 18)
+
+    #add garbage bins maps
+    for p in POSITIONS:
+        folium.Marker(location=[p[0], p[1]],
+                    icon = folium.features.CustomIcon("assets\dustbin.png",
+                                                    icon_size=(20, 20))
+                    ).add_to(rome_map)
 
     #take trucks position, add it to maps
     for truck in GARBAGE_TRUCKS:
@@ -114,33 +99,21 @@ def update_map(n):
                                                                    icon_size=(35, 35)),
                                                                    popup=f'Garbage truck #{truck}'
                      ).add_to(rome_map)
-        #add garbage bins maps
-        for p in POSITIONS[truck]: 
-            if truck == 0:
-                folium.Marker(location=[p[0], p[1]],
-                          icon = folium.features.CustomIcon("assets\dustbin.png",
-                                                            icon_size=(20, 20))
-                          ).add_to(rome_map)
-            else:
-                folium.Marker(location=[p[0], p[1]],
-                          icon = folium.features.CustomIcon(r"assets\bluebin.png",
-                                                            icon_size=(20, 20))
-                          ).add_to(rome_map) 
 
+    # get directions
+    if False: #SHOW_ROUTES[truck]:  # decomment to use API; TODO: add checkbox to toggle route drawing
+        # coordinates = [[truck_pos[1], truck_pos[0]]] + [[POSITIONS[idx][1], POSITIONS[idx][0]] for idx in paths[truck]]
+        coordinates = [[POSITIONS[idx][1], POSITIONS[idx][0]] for idx in paths[truck]]
+        route = clnt.directions(coordinates=coordinates,
+                                    profile='driving-car',
+                                    format='geojson',
+                                    preference='fastest',
+                                    geometry=True,
+                                    geometry_simplify=True)
+        # swap lat/long for folium
+        points = [[p[1], p[0]] for p in route['features'][0]['geometry']['coordinates']]
 
-        # get directions
-        if False: #SHOW_ROUTES[truck]:  # decomment to use API; TODO: add checkbox to toggle route drawing
-            coordinates = [[truck_pos[1], truck_pos[0]]] + [[p[1], p[0]] for p in POSITIONS[truck]]
-            route = clnt.directions(coordinates=coordinates,
-                                        profile='driving-car',
-                                        format='geojson',
-                                        preference='fastest',
-                                        geometry=True,
-                                        geometry_simplify=True)
-            # swap lat/long for folium
-            points = [[p[1], p[0]] for p in route['features'][0]['geometry']['coordinates']]
-
-            folium.PolyLine(points, color='red', weight=10, opacity=0.8).add_to(rome_map)
+        folium.PolyLine(points, color='red', weight=10, opacity=0.8).add_to(rome_map)
 
     return rome_map._repr_html_()
 
