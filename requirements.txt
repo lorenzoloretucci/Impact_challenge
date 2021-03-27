@@ -6,3 +6,4 @@ openrouteservice
 tensorflow
 networkx
 geopy
+sklearn
