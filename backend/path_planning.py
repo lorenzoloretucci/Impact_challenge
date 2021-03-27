@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from itertools import combinations, permutations
 
-def cammino(a,G):
+def shortest_walk(a,G):
     '''
     Takes in input the starting node a,  a nx.Graph object and computes
     the shortest walk passing for all nodes.
@@ -58,7 +58,7 @@ def path_planning(clust, centers, DIR_PATH):
         #I create a complete graph where each edge has as weights the distance as the crow flies between the coordinates associated with the nodes
         G = nx.Graph((x, y, {'weight':v}) for (x,y), v in diz_edges.items())
         #I apply the planning algorithm and return the ordered dictionary
-        path = cammino(d[0],G)
+        path = shortest_walk(d[0],G)
         result[cl] = path
     
     trucks_ids = []
