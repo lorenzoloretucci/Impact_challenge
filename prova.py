@@ -100,20 +100,20 @@ def update_map(n):
                                                                    popup=f'Garbage truck #{truck}'
                      ).add_to(rome_map)
 
-    # get directions
-    if False: #SHOW_ROUTES[truck]:  # decomment to use API; TODO: add checkbox to toggle route drawing
-        # coordinates = [[truck_pos[1], truck_pos[0]]] + [[POSITIONS[idx][1], POSITIONS[idx][0]] for idx in paths[truck]]
-        coordinates = [[POSITIONS[idx][1], POSITIONS[idx][0]] for idx in paths[truck]]
-        route = clnt.directions(coordinates=coordinates,
-                                    profile='driving-car',
-                                    format='geojson',
-                                    preference='fastest',
-                                    geometry=True,
-                                    geometry_simplify=True)
-        # swap lat/long for folium
-        points = [[p[1], p[0]] for p in route['features'][0]['geometry']['coordinates']]
+        # get directions
+        if SHOW_ROUTES[truck]:  # decomment to use API; TODO: add checkbox to toggle route drawing
+            # coordinates = [[truck_pos[1], truck_pos[0]]] + [[POSITIONS[idx][1], POSITIONS[idx][0]] for idx in paths[truck]]
+            coordinates = [[POSITIONS[idx][1], POSITIONS[idx][0]] for idx in paths[truck]]
+            route = clnt.directions(coordinates=coordinates,
+                                        profile='driving-car',
+                                        format='geojson',
+                                        preference='fastest',
+                                        geometry=True,
+                                        geometry_simplify=True)
+            # swap lat/long for folium
+            points = [[p[1], p[0]] for p in route['features'][0]['geometry']['coordinates']]
 
-        folium.PolyLine(points, color='red', weight=10, opacity=0.8).add_to(rome_map)
+            folium.PolyLine(points, color='red', weight=10, opacity=0.8).add_to(rome_map)
 
     return rome_map._repr_html_()
 
