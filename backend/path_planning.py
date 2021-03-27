@@ -22,15 +22,23 @@ def cammino(a,G):
     
     
 #It takes as input a dictionary that has the various clusters as keys and the nodes associated with each cluster as values and the path of the database
-def path_planning(clust,DIR_PATH):
+def path_planning(clust, centers, DIR_PATH):
+    trucks_assign = truck_cluster_assignments(DIR_PATH, centers)
+
     df = pd.read_csv(DIR_PATH + '/DATABASE/coords_groups.csv')
     result = {}
     #for each cluster of nodes I calculate the distances using the coordinates
-    for cl in clust:
-        d = clust[cl]
+    for cl, tr in zip(clust, trucks_assign.keys()):
+        d = [tr]
+        d = d + clust[cl]
         diz_edges = {}
         for i in range(len(d)):
-            coords_1 = df.loc[df["id"] == d[i],['latitude','longitude']].values
+
+            if i!=0:
+                coords_1 = df.loc[df["id"] == d[i],['latitude','longitude']].values
+            else:
+                coords_1 = truck_assign[tr]
+
             if i+1 > len(d):
                 break
             else:
@@ -43,8 +51,51 @@ def path_planning(clust,DIR_PATH):
         #I apply the planning algorithm and return the ordered dictionary
         path = cammino(d[0],G)
         result[cl] = path
-    return result
     
+    trucks_ids = []
+    for key in result:
+        trucks_ids.append(result[key].pop(0))
+
+    result['trucks'] = trucks_ids
+    return result
+
+def truck_cluster_assignments(DIR_PATH, centers):
+
+    '''
+    Function that takes accesses the DB and assignes the available trucks 
+    to the relative cluster.
+    
+    '''
+    trucks_coords =  pd.read_csv(DIR_PATH + '/DATABASE/trucks_coords.csv')
+    trucks_coords['available'] = [1,0,0,1,1,0]
+    truck_ids = trucks_coords.loc[trucks_coords['available']==1, 'truck_id'].values
+    trucks_coords = trucks_coords.loc[ trucks_coords['available']==1, [' latitude', ' longitude']].values
+
+    dists = []
+
+    for c in centers:
+        temp = []
+        for t in trucks_coords:
+            temp.append(geopy.distance.distance(c, t).m)
+        dists.append(temp)
+
+    dists = np.array(dists)
+    t = [i for i in range(len(truck_ids))]
+
+    combs = list(combinations(t, 2))
+    perms = []
+    for c in combs:
+        perms = perms + list(permutations(c))
+
+    min_vals = []
+    for val in perms:
+        min_sum = 0
+        for i in range(len(val)):
+            min_sum += dists[i, val[i]]
+        min_vals.append(min_sum)
+    assigned_trucks = { truck_ids[t]:trucks_coords[t] for t in perms[np.argmin(min_vals)] }
+
+    return assigned_trucks
     
     
     
