@@ -9,6 +9,6 @@ def get_paths(n_trucks):
     predictor = backend.prediction.MakePrediction(DIR_PATH)
     pred = predictor.prediction()
 
-    zones_split = backend.zone_splitting.kmeans_subdivision(pred, DIR_PATH, n_trucks)
+    zones_split, centers = backend.zone_splitting.kmeans_subdivision(pred, DIR_PATH, n_trucks)
 
-    return backend.path_planning.path_planning(zones_split, DIR_PATH)
+    return backend.path_planning.path_planning(zones_split, centers, DIR_PATH)
