@@ -14,14 +14,14 @@ import plotly.express as px
 import random
 from backend.path_planning import path_planning
 from backend.zone_splitting import kmeans_subdivision
-from backend.prediction import MakePrediction
-import tensorflow as tf
+#from backend.prediction import MakePrediction
+#import tensorflow as tf
 
 random.seed(123)
 np.random.seed(123)
 
-physical_devices = tf.config.list_physical_devices('GPU') 
-tf.config.experimental.set_memory_growth(physical_devices[0], True)
+#physical_devices = tf.config.list_physical_devices('GPU') 
+#tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 curr_dir = os.getcwd()
 config_file = os.path.join(curr_dir, 'configs.ini')
@@ -45,7 +45,7 @@ garbage_trucks = pd.read_csv('DATABASE/trucks_coords.csv')
 GARBAGE_TRUCKS = garbage_trucks[['latitude','longitude']].values
 available_garbage_trucks = garbage_trucks['available'].sum()  # only available garbage trucks
 
-predictor = MakePrediction('.')
+# predictor = MakePrediction('.')
 
 GARBAGE_LABELS = []
 for k in garbage_trucks['truck_id']:
@@ -53,7 +53,9 @@ for k in garbage_trucks['truck_id']:
 SHOW_ROUTES = {0: False, 1: False, 2: False, 3: False, 4: False, 5: False}
 
 # precompute paths
-bins_full = predictor.prediction()
+#bins_full = predictor.prediction()
+
+bins_full = np.array([0,  1,  2,  3,  4,  5,  6,  7, 12, 14, 19, 21, 22, 23])
 clusters, centers = kmeans_subdivision(bins_full, '.', available_garbage_trucks)
 paths = path_planning(clusters, centers, '.')
 
