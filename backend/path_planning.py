@@ -27,10 +27,11 @@ def shortest_walk(a,G):
     
 def path_planning(clust, centers, DIR_PATH):
     '''
-    takes as input a dictionary that has the various clusters as keys 
+    Takes as input a dictionary that has the various clusters as keys 
     and the nodes associated with each cluster as values and the path 
-    of the database. Returns a dict containing the paths and the tracks'
-    positions.
+    of the database. Returns a dict containing the paths of bins ordered
+    and a value 'trucks' that indicates the trucks ids associated to 
+    each cluster.
     '''
     trucks_assign = truck_cluster_assignments(DIR_PATH, centers)
 
