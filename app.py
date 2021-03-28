@@ -3,12 +3,25 @@ import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 import numpy as np
-import folium
 from dash.dependencies import Output, Input
+import dash_table
 from openrouteservice import client
 import json
 import configparser
 import os
+import folium
+import plotly.express as px
+import random
+from backend.path_planning import path_planning
+from backend.zone_splitting import kmeans_subdivision
+#from backend.prediction import MakePrediction
+#import tensorflow as tf
+
+random.seed(123)
+np.random.seed(123)
+
+#physical_devices = tf.config.list_physical_devices('GPU') 
+#tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 curr_dir = os.getcwd()
 config_file = os.path.join(curr_dir, 'configs.ini')
@@ -26,16 +39,25 @@ app.title = "UnWaste! Project"
 
 START_COORDS = (41.89117549369146, 12.502362854652286)
 # positions are divided in groups for each garbage-truck
-POSITIONS = {0: [(41.8908906679924, 12.502572097053521), 
-            (41.891579262511144, 12.502176550683817), 
-            (41.8924103430201, 12.503031390817107), 
-            (41.893027676367694, 12.501927753222729)]}
-GARBAGE_TRUCKS = {0: [(41.89094733558171, 12.505344489064024),
-                      (41.890840034189985, 12.504987924351767),
-                      (41.890631075681256, 12.504282384995024),
-                      (41.89046164764188, 12.503819614718148)]}
-SHOW_ROUTES = {0: False}
+garbage_bins = pd.read_csv('./DATABASE/coords_groups.csv')
+POSITIONS = garbage_bins[['latitude','longitude']].values
+garbage_trucks = pd.read_csv('DATABASE/trucks_coords.csv')
+GARBAGE_TRUCKS = garbage_trucks[['latitude','longitude']].values
+available_garbage_trucks = garbage_trucks['available'].sum()  # only available garbage trucks
 
+# predictor = MakePrediction('.')
+
+GARBAGE_LABELS = []
+for k in garbage_trucks['truck_id']:
+    GARBAGE_LABELS.append({'label': f'Truck #{k + 1}', 'value': str(k)})
+SHOW_ROUTES = {0: False, 1: False, 2: False, 3: False, 4: False, 5: False}
+
+# precompute paths
+#bins_full = predictor.prediction()
+
+bins_full = np.array([0,  1,  2,  3,  4,  5,  6,  7, 12, 14, 19, 21, 22, 23])
+clusters, centers = kmeans_subdivision(bins_full, '.', available_garbage_trucks)
+paths = path_planning(clusters, centers, '.')
 
 clnt = client.Client(key=API_KEY) # Create client with api key
 
@@ -44,27 +66,49 @@ clnt = client.Client(key=API_KEY) # Create client with api key
 @app.callback(Output('map', 'srcDoc'),
               Input('interval-component', 'n_intervals'))  # add an input here to load the pathon the map at a user's notice
 def update_map(n):
-    global START_COORDS, POSITIONS, GARBAGE_TRUCKS, SHOW_ROUTES
+    global START_COORDS, POSITIONS, GARBAGE_TRUCKS, SHOW_ROUTES, paths
 
-    rome_map = folium.Map(location = START_COORDS, title = "Rome", zoom_start = 16, min_zoom = 16, max_zoom = 16)
+    rome_map = folium.Map(location = START_COORDS, title = "Rome", zoom_start = 16, min_zoom = 16, max_zoom = 18)
 
-    for truck in GARBAGE_TRUCKS:
-        truck_pos = GARBAGE_TRUCKS[truck][n % len(GARBAGE_TRUCKS[truck])][0], GARBAGE_TRUCKS[truck][n % len(GARBAGE_TRUCKS[truck])][1]
-        folium.Marker(location=[truck_pos[0], truck_pos[1]],
-                                icon = folium.features.CustomIcon("assets\garbagetruck.png",
-                                                                   icon_size=(25, 25)),
-                                                                   popup=f'Garbage truck #{truck}'
-                     ).add_to(rome_map)
-
-        for p in POSITIONS[truck]: 
+    #add not-full garbage bins maps
+    for i, p in enumerate(POSITIONS):
+        if i not in bins_full:
             folium.Marker(location=[p[0], p[1]],
-                          icon = folium.features.CustomIcon("assets\dustbin.png",
-                                                            icon_size=(30, 30))
-                          ).add_to(rome_map)
+                        icon = folium.features.CustomIcon("assets\dustbin.png",
+                                                        icon_size=(20, 20)),
+                                                        popup=f'Garbage bin #{int(i)}'
+                        ).add_to(rome_map)
+        else:
+            folium.Marker(location=[p[0], p[1]],
+                        icon = folium.features.CustomIcon("assets/bluebin.png",
+                                                        icon_size=(20, 20)),
+                                                        popup=f'Garbage bin #{int(i)}'
+                        ).add_to(rome_map)
+
+    # draw active trucks
+    active_trucks_pos = garbage_trucks.loc[garbage_trucks['available'] == 1, ['truck_id', 'latitude','longitude']].values
+    for pos in active_trucks_pos:
+        folium.Marker(location=[pos[1], pos[2]],
+                                icon = folium.features.CustomIcon("assets\garbagetruck.png",
+                                                                icon_size=(35, 35)),
+                                                                popup=f'Garbage truck #{int(pos[0] + 1)}'
+                    ).add_to(rome_map)
+    # draw inactive trucks
+    inactive_trucks_pos = garbage_trucks.loc[garbage_trucks['available'] == 0, ['truck_id', 'latitude','longitude']].values
+    for pos in inactive_trucks_pos:
+        folium.Marker(location=[pos[1], pos[2]],
+                                icon = folium.features.CustomIcon("assets\garbagetruck_off.png",
+                                                                icon_size=(35, 35)),
+                                                                popup=f'Garbage truck #{int(pos[0] + 1)}'
+                    ).add_to(rome_map)
+
+    #take trucks position, add it to maps
+    for truck in garbage_trucks['truck_id'].values:
 
         # get directions
-        if SHOW_ROUTES[truck]:
-            coordinates = [[truck_pos[1], truck_pos[0]]] + [[p[1], p[0]] for p in POSITIONS[truck]]
+        if truck in paths['trucks'] and SHOW_ROUTES[truck]:  # decomment to use API; TODO: add checkbox to toggle route drawing
+            bins_ids = paths['zone_' + str(paths['trucks'].index(truck))]
+            coordinates = [[GARBAGE_TRUCKS[truck][1], GARBAGE_TRUCKS[truck][0]]] + [[POSITIONS[idx][1], POSITIONS[idx][0]] for idx in bins_ids] 
             route = clnt.directions(coordinates=coordinates,
                                         profile='driving-car',
                                         format='geojson',
@@ -91,22 +135,168 @@ def update_output(n_clicks, value):
         SHOW_ROUTES[truck_n] = True
     return ''
 
+##### callback for left-stats #####
+@app.callback(
+    Output("pie-chart", "figure"), 
+    [Input("names", "value"), 
+     Input("values", "value")])
+def generate_chart(names, values):
+    fig = px.pie(df_left, values= values, names= names)
+    return fig
+
+
+##### callback for right- stats ###
+@app.callback(
+    Output("histo", "figure"), 
+    [Input("waste", "value")])
+def display_color(waste):
+    waste_type = df_right['waste'] == waste
+    fig = px.bar(df_right[waste_type], x ='day', y = 'total_waste')
+    return fig
+
+
+
+
+
+###############  Dataframe ############################## 
+data = {"Report_id":[000,111,222,333], 
+        "Truck_id":[234,567,876,766],
+         "Type":['Report', "Issiue", "NaN", "Injury"],
+         "Operator": ['Anil',"Giuliano", "Marco", "Alberto" ]}
+
+df = pd.DataFrame(data)
+
+choose_len = 20
+
+#####  Trucks Dataframe ###
+condition_fuel_mount =['Empty', 'Full', '50%']
+TIME = ["morning", "evening", "afternoon"]
+
+data_left = {'Fuel_L':[random.randrange(1,80,1) for i in range(choose_len)],
+             "mount_mc": [random.randrange(1,15,1) for i in range(choose_len)],
+             "truck_fuel_situation": [random.choice(condition_fuel_mount) for i in range(choose_len)],
+             "time": [random.choice(TIME) for i in range(choose_len)]}
+
+df_left = pd.DataFrame(data_left)
+
+####### Waste dataframe 
+waste_type = ['PET', 'alluminium', "paper", "glassware", "metalware", "undifferentiated"]
+TIME_week = ['Monday',"Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Suday"]
+
+data_right = {"waste": [random.choice(waste_type) for i in range(choose_len)],
+            "total_waste":[random.randrange(1,648,1) for i in range(choose_len)],
+            "day": [random.choice(TIME_week) for i in range(choose_len)]}
+
+
+df_right = pd.DataFrame(data_right)
+wastes = df_right.waste.unique()
+###########################################################
+
+
 app.layout = html.Div(
-    children = [
-        html.Div(children = [html.H1("UnWaste!"),html.P('Demo dashboard', className = 'Header')]),
-        html.Div(children = [
-            html.Div([html.Iframe(id = 'map', srcDoc = None, width = "50%", height = "500", style={'display': 'inline-block'}),
-                      html.Div(dcc.Input(id='input-on-submit', type='text', value='0')),
-                      html.Button('Submit', id='submit-val', n_clicks=0),
-                      html.Div(id='ignore-me', hidden=True)]),
-            dcc.Graph(id="graph2",style={'display': 'inline-block', 'height' : "600"})]),
-        dcc.Interval(
-            id='interval-component',
-            interval=UPDATE_INTERVAL,
-            n_intervals=0
-        )
-    ]
+    #MAIN
+            children = [    
+                #header#
+                        html.Div(children = [
+                                            html.H1("UnWaste!", className = "header-title"),
+                                            html.P('Demo dashboard', className = 'header-description')
+                                            ],
+                                className = 'header'
+                                ),
+                #Body1#
+                        html.Div(children = [
+                                            #Map#
+                                            html.Div([
+                                                        html.H3('Path Map',  className = 'wintitle'),
+                                                        html.Iframe(id = 'map', srcDoc = None, className = 'inframe_map' ),
+                                            #Button div
+                                                        html.Div([dcc.Dropdown(id='input-on-submit', options = GARBAGE_LABELS, value='0'),
+                                                                    html.Button('Submit', id='submit-val', n_clicks=0),
+                                                                    html.Div(id='ignore-me', hidden=True)
+                                                                 ])
+                                                     ],
+                                                        
+                                                    className = "Map"),
+                                        
+                                            #Report#
+                                            html.Div([
+                                                    # reportTitle
+                                                    html.H3('Real-Time Reports',  className = 'wintitle'),
+                                                     #Table
+                                                    dash_table.DataTable(id='table',columns=[{"name": i, "id": i} for i in df.columns],data=df.to_dict('records')),
+                                                    
+                                                    ],
+                                                    className="Report"
+                                                    ),
+                                            html.Div([
+                                                dcc.Interval(
+                                                id='interval-component',
+                                                interval=UPDATE_INTERVAL,
+                                                n_intervals=0)
+                                                    ]),
+
+                    
+                                            
+                                            ],
+                                            
+                                        className = 'wrapper'),
+                        ## body 2
+                        html.Div(children = [
+                                            ##left-stats
+                                            html.Div([ 
+                                                    html.H3('Real-time Trucks stats', className = 'wintitle'),
+                                                    html.P("Names:"),
+                                                    dcc.Dropdown(
+                                                                id='names', 
+                                                                value='truck_fuel_situation', 
+                                                                options=[{'value': x, 'label': x} for x in ['truck_fuel_situation', 'time']],
+                                                                clearable=False
+                                                                ),
+                                                    html.P("Values:"),
+                                                    dcc.Dropdown(
+                                                                id='values', 
+                                                                value='Fuel_L', 
+                                                                options=[{'value': x, 'label': x} for x in ['Fuel_L', 'mount_mc']],
+                                                                clearable=False
+                                                                ),
+                                                    
+                                                    dcc.Graph(id="pie-chart"),
+                                                  
+                                                    ],
+                                                    className = "left-stats"),
+                                            #right Stats
+                                            html.Div([
+                                                    html.H3('Real-Time bin stats',  className = 'wintitle'),
+                                        
+                                                    html.P("Waste:"),
+                                                    dcc.Dropdown(
+                                                                id='waste', 
+                                                                value='PET', 
+                                                                options=[{'value': x, 'label': x} for x in wastes],
+                                                                clearable=False
+                                                                ),
+
+                                                       dcc.Graph(id="histo"),
+                                                            
+
+                                                    ],
+                                                    className="right-stats")
+                                            
+
+                            
+
+
+
+                                            ], 
+                                            className = "wrapper"),
+                                  
+                        ],
+className="HTML"
 )
+
+
+
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
