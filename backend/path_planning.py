@@ -73,7 +73,9 @@ def truck_cluster_assignments(DIR_PATH, centers):
 
     '''
     Function that takes accesses the DB and assignes the available trucks 
-    to the relative cluster.
+    to the relative cluster by measuring the distance between each truck 
+    and the cluster centers. The assignments is performed such that the sum
+    of distances between the trucks and centers is minimum.
     
     '''
     trucks_coords =  pd.read_csv(DIR_PATH + '/DATABASE/trucks_coords.csv')
