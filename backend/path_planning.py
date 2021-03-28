@@ -46,7 +46,7 @@ def path_planning(clust, centers, DIR_PATH):
             if i!=0:
                 coords_1 = df.loc[df["id"] == d[i],['latitude','longitude']].values
             else:
-                coords_1 = truck_assign[tr]
+                coords_1 = trucks_assign[tr]
 
             if i+1 > len(d):
                 break
