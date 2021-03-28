@@ -60,7 +60,7 @@ def path_planning(clust, centers, DIR_PATH):
         G = nx.Graph((x, y, {'weight':v}) for (x,y), v in diz_edges.items())
         #I apply the planning algorithm and return the ordered dictionary
         path = shortest_walk(d[0],G)
-        result[cl] = path
+        result['zone_'+str(cl)] = path
     
     trucks_ids = []
     for key in result:
