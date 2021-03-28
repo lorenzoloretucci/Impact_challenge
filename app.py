@@ -32,8 +32,8 @@ UPDATE_INTERVAL = config['GENERAL'].getint('UPDATE_INTERVAL')
 
 # APP PROPERTIES
 app = dash.Dash(name='UnWaste! FrontEnd')
-app.title = "UnWaste! Project"
 server = app.server
+app.title = "UnWaste! Project"
 
 # EXTERNAL SETTINGS
 # should be loaded elsewhere and imported here / in a submodule
