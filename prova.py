@@ -15,9 +15,13 @@ import random
 from backend.path_planning import path_planning
 from backend.zone_splitting import kmeans_subdivision
 from backend.prediction import MakePrediction
+import tensorflow as tf
 
 random.seed(123)
 np.random.seed(123)
+
+physical_devices = tf.config.list_physical_devices('GPU') 
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 curr_dir = os.getcwd()
 config_file = os.path.join(curr_dir, 'configs.ini')
