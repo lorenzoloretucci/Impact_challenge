@@ -75,13 +75,13 @@ def update_map(n):
     for i, p in enumerate(POSITIONS):
         if i not in bins_full:
             folium.Marker(location=[p[0], p[1]],
-                        icon = folium.features.CustomIcon( os.path.join(curr_dir, ".\\assets\\dustbin.png"),
+                        icon = folium.features.CustomIcon( "https://github.com/lorenzoloretucci/Impact_challenge/blob/horeku/assets/dustbin.png",
                                                         icon_size=(20, 20)),
                                                         popup=f'Garbage bin #{int(i)}'
                         ).add_to(rome_map)
         else:
             folium.Marker(location=[p[0], p[1]],
-                        icon = folium.features.CustomIcon( os.path.join(curr_dir, ".\\assets\\bluebin.png"),
+                        icon = folium.features.CustomIcon( "https://github.com/lorenzoloretucci/Impact_challenge/blob/horeku/assets/bluebin.png",
                                                         icon_size=(20, 20)),
                                                         popup=f'Garbage bin #{int(i)}'
                         ).add_to(rome_map)
@@ -90,7 +90,7 @@ def update_map(n):
     active_trucks_pos = garbage_trucks.loc[garbage_trucks['available'] == 1, ['truck_id', 'latitude','longitude']].values
     for pos in active_trucks_pos:
         folium.Marker(location=[pos[1], pos[2]],
-                                icon = folium.features.CustomIcon( os.path.join(curr_dir, ".\\assets\\garbagetruck.png"),
+                                icon = folium.features.CustomIcon( "https://github.com/lorenzoloretucci/Impact_challenge/blob/horeku/assets/garbagetruck.png",
                                                                 icon_size=(35, 35)),
                                                                 popup=f'Garbage truck #{int(pos[0] + 1)}'
                     ).add_to(rome_map)
@@ -98,7 +98,7 @@ def update_map(n):
     inactive_trucks_pos = garbage_trucks.loc[garbage_trucks['available'] == 0, ['truck_id', 'latitude','longitude']].values
     for pos in inactive_trucks_pos:
         folium.Marker(location=[pos[1], pos[2]],
-                                icon = folium.features.CustomIcon( os.path.join(curr_dir, ".\\assets\\garbagetruck_off.png"),
+                                icon = folium.features.CustomIcon( "https://github.com/lorenzoloretucci/Impact_challenge/blob/horeku/assets/garbagetruck_off.png",
                                                                 icon_size=(35, 35)),
                                                                 popup=f'Garbage truck #{int(pos[0] + 1)}'
                     ).add_to(rome_map)
