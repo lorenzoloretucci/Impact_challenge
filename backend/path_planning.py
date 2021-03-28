@@ -94,7 +94,7 @@ def truck_cluster_assignments(DIR_PATH, centers):
     dists = np.array(dists)
     t = [i for i in range(len(truck_ids))]
 
-    combs = list(combinations(t, 2))
+    combs = list(combinations(t, len(centers) ))
     perms = []
     for c in combs:
         perms = perms + list(permutations(c))
