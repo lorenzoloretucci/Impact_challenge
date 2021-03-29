@@ -1,5 +1,6 @@
 import dash 
 import dash_core_components as dcc
+import dash_bootstrap_components as dbc
 import dash_html_components as html
 import pandas as pd
 import numpy as np
@@ -198,18 +199,41 @@ data_right = {"waste": [random.choice(waste_type) for i in range(choose_len)],
 df_right = pd.DataFrame(data_right)
 wastes = df_right.waste.unique()
 ###########################################################
+###########SIDEBAR  
+
+sidebar = html.Div(
+    [
+        html.Img(src = "https://i.imgur.com/lz16RME.png", className="Logo"), #Logo
+        html.Hr( className = "sidebar_divisor"),
+        dbc.Nav(
+            [
+                dbc.NavLink(html.Img(src="https://i.imgur.com/rCuGj8H.png", width=40, height=40), href="/", active="exact"), #Home
+                dbc.NavLink(html.Img(src = "https://i.imgur.com/LXXgKM4.png", width=40, height=40), href="/page-1", active="exact"),# Bins
+                dbc.NavLink(html.Img(src = "https://i.imgur.com/ZOFEbQ9.png", width=40, height=40), href="/page-2", active="exact"), #Truks
+                dbc.NavLink(html.Img(src = "https://i.imgur.com/9PYccOX.png", width=40, height=40), href="/page-2", active="exact"), #info
+            ],
+            vertical=True,
+            pills=True, 
+            className = "navbar"
+        ),
+    ],
+    className='sidebar',
+)
 
 
-app.layout = html.Div(
+
+
+
+home = html.Div(
     #MAIN
             children = [    
                 #header#
-                        html.Div(children = [
-                                            html.H1("UnWaste! | Demo Dashboard", className = "header-title"),
+                       # html.Div(children = [
+                       #                     html.H1("UnWaste! | Demo Dashboard", className = "header-title"),
                                             #   html.P('Demo dashboard', className = 'header-description')
-                                            ],
-                                className = 'header'
-                                ),
+                       #                     ],
+                       #         className = 'header'
+                       #         ),
                 #Body1#
                         html.Div(children = [
                                             #Map#
@@ -267,7 +291,7 @@ app.layout = html.Div(
                                                                 clearable=False
                                                                 ),
                                                     
-                                                    dcc.Graph(id="pie-chart", className= 'graph'),
+                                                    dcc.Graph(id="pie-chart", className= 'graph', config = {"responsive": True, "autosizable": True, "fillFrame": False}),
                                                   
                                                     ],
                                                     className = "left-stats"),
@@ -283,7 +307,7 @@ app.layout = html.Div(
                                                                 clearable=False
                                                                 ),
 
-                                                       dcc.Graph(id="histo", className= 'graph'),
+                                                       dcc.Graph(id="histo", className= 'graph', config = {"responsive": True, "autosizable": True, "fillFrame": False}),
                                                             
 
                                                     ],
@@ -301,8 +325,28 @@ app.layout = html.Div(
 className="HTML"
 )
 
+content = html.Div(id="page-content", className="content")
+
+app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
 
 
+
+@app.callback(Output("page-content", "children"), [Input("url", "pathname")])
+def render_page_content(pathname):
+    if pathname == "/":
+        return home
+    elif pathname == "/page-1":
+        return html.P("This is the content of page 1. Yay!")
+    elif pathname == "/page-2":
+        return html.P("Oh cool, this is page 2!")
+    # If the user tries to reach a different page, return a 404 message
+    return dbc.Jumbotron(
+        [
+            html.H1("404: Not found", className="text-danger"),
+            html.Hr(),
+            html.P(f"The pathname {pathname} was not recognised..."),
+        ]
+    )
 
 
 if __name__ == "__main__":
