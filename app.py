@@ -75,13 +75,13 @@ def update_map(n):
     for i, p in enumerate(POSITIONS):
         if i not in bins_full:
             folium.Marker(location=[p[0], p[1]],
-                        icon = folium.features.CustomIcon( "https://github.com/lorenzoloretucci/Impact_challenge/blob/horeku/assets/dustbin.png",
+                        icon = folium.features.CustomIcon( "https://i.imgur.com/LXXgKM4.png",
                                                         icon_size=(20, 20)),
                                                         popup=f'Garbage bin #{int(i)}'
                         ).add_to(rome_map)
         else:
             folium.Marker(location=[p[0], p[1]],
-                        icon = folium.features.CustomIcon( "https://github.com/lorenzoloretucci/Impact_challenge/blob/horeku/assets/bluebin.png",
+                        icon = folium.features.CustomIcon( "https://i.imgur.com/y8mMdnB.png",
                                                         icon_size=(20, 20)),
                                                         popup=f'Garbage bin #{int(i)}'
                         ).add_to(rome_map)
@@ -90,7 +90,7 @@ def update_map(n):
     active_trucks_pos = garbage_trucks.loc[garbage_trucks['available'] == 1, ['truck_id', 'latitude','longitude']].values
     for pos in active_trucks_pos:
         folium.Marker(location=[pos[1], pos[2]],
-                                icon = folium.features.CustomIcon( "https://github.com/lorenzoloretucci/Impact_challenge/blob/horeku/assets/garbagetruck.png",
+                                icon = folium.features.CustomIcon( "https://i.imgur.com/qsFNVJj.png",
                                                                 icon_size=(35, 35)),
                                                                 popup=f'Garbage truck #{int(pos[0] + 1)}'
                     ).add_to(rome_map)
@@ -98,7 +98,7 @@ def update_map(n):
     inactive_trucks_pos = garbage_trucks.loc[garbage_trucks['available'] == 0, ['truck_id', 'latitude','longitude']].values
     for pos in inactive_trucks_pos:
         folium.Marker(location=[pos[1], pos[2]],
-                                icon = folium.features.CustomIcon( "https://github.com/lorenzoloretucci/Impact_challenge/blob/horeku/assets/garbagetruck_off.png",
+                                icon = folium.features.CustomIcon( "https://i.imgur.com/eSyUS0b.png",
                                                                 icon_size=(35, 35)),
                                                                 popup=f'Garbage truck #{int(pos[0] + 1)}'
                     ).add_to(rome_map)
@@ -160,14 +160,20 @@ def display_color(waste):
 
 
 ###############  Dataframe ############################## 
-data = {"Report_id":[000,111,222,333], 
-        "Truck_id":[234,567,876,766],
-         "Type":['Report', "Issiue", "NaN", "Injury"],
-         "Operator": ['Anil',"Giuliano", "Marco", "Alberto" ]}
+choose_len = 20
+choose_len2 = 14
+
+Type_report = ['Report', "Issiue", "NaN", "Injury"]
+Type_name = ['Anil',"Giuliano", "Marco", "Alberto", 
+                "Giuliana", "Maria", "Paola", "Ignazio"]
+
+data = {"Report_id":[random.randrange(1257,3679,1) for i in range(choose_len2)], 
+        "Truck_id":[random.randrange(1,60,1) for i in range(choose_len2)],
+         "Type":[random.choice(Type_report) for i in range(choose_len2)],
+         "Operator":[random.choice(Type_name) for i in range(choose_len2)] }
 
 df = pd.DataFrame(data)
 
-choose_len = 20
 
 #####  Trucks Dataframe ###
 condition_fuel_mount =['Empty', 'Full', '50%']
@@ -199,8 +205,8 @@ app.layout = html.Div(
             children = [    
                 #header#
                         html.Div(children = [
-                                            html.H1("UnWaste!", className = "header-title"),
-                                            html.P('Demo dashboard', className = 'header-description')
+                                            html.H1("UnWaste! | Demo Dashboard", className = "header-title"),
+                                            #   html.P('Demo dashboard', className = 'header-description')
                                             ],
                                 className = 'header'
                                 ),
@@ -208,11 +214,11 @@ app.layout = html.Div(
                         html.Div(children = [
                                             #Map#
                                             html.Div([
-                                                        html.H3('Path Map',  className = 'wintitle'),
+                                                        #html.H3('Path Map',  className = 'wintitle'),
                                                         html.Iframe(id = 'map', srcDoc = None, className = 'inframe_map' ),
                                             #Button div
-                                                        html.Div([dcc.Dropdown(id='input-on-submit', options = GARBAGE_LABELS, value='0'),
-                                                                    html.Button('Submit', id='submit-val', n_clicks=0),
+                                                        html.Div([dcc.Dropdown(id='input-on-submit', options = GARBAGE_LABELS, value='0', className = 'nav_map' ),
+                                                                    html.Button('Submit', id='submit-val', n_clicks=0, className = 'Button_map' ),
                                                                     html.Div(id='ignore-me', hidden=True)
                                                                  ])
                                                      ],
@@ -222,7 +228,7 @@ app.layout = html.Div(
                                             #Report#
                                             html.Div([
                                                     # reportTitle
-                                                    html.H3('Real-Time Reports',  className = 'wintitle'),
+                                                    #html.H3('Real-Time Reports',  className = 'wintitle'),
                                                      #Table
                                                     dash_table.DataTable(id='table',columns=[{"name": i, "id": i} for i in df.columns],data=df.to_dict('records')),
                                                     
@@ -240,20 +246,20 @@ app.layout = html.Div(
                                             
                                             ],
                                             
-                                        className = 'wrapper'),
+                                        className = 'wrapper1'),
                         ## body 2
                         html.Div(children = [
                                             ##left-stats
                                             html.Div([ 
-                                                    html.H3('Real-time Trucks stats', className = 'wintitle'),
-                                                    html.P("Names:"),
+                                                    #html.H3('Real-time Trucks stats', className = 'wintitle'),
+                                                    html.P("Names:", className = 'name_selector'),
                                                     dcc.Dropdown(
                                                                 id='names', 
                                                                 value='truck_fuel_situation', 
                                                                 options=[{'value': x, 'label': x} for x in ['truck_fuel_situation', 'time']],
                                                                 clearable=False
                                                                 ),
-                                                    html.P("Values:"),
+                                                    html.P("Values:", className = 'name_selector'),
                                                     dcc.Dropdown(
                                                                 id='values', 
                                                                 value='Fuel_L', 
@@ -261,15 +267,15 @@ app.layout = html.Div(
                                                                 clearable=False
                                                                 ),
                                                     
-                                                    dcc.Graph(id="pie-chart"),
+                                                    dcc.Graph(id="pie-chart", className= 'graph'),
                                                   
                                                     ],
                                                     className = "left-stats"),
                                             #right Stats
                                             html.Div([
-                                                    html.H3('Real-Time bin stats',  className = 'wintitle'),
+                                                    #html.H3('Real-Time bin stats',  className = 'wintitle'),
                                         
-                                                    html.P("Waste:"),
+                                                    html.P("Waste:", className = 'name_selector'),
                                                     dcc.Dropdown(
                                                                 id='waste', 
                                                                 value='PET', 
@@ -277,7 +283,7 @@ app.layout = html.Div(
                                                                 clearable=False
                                                                 ),
 
-                                                       dcc.Graph(id="histo"),
+                                                       dcc.Graph(id="histo", className= 'graph'),
                                                             
 
                                                     ],
@@ -289,7 +295,7 @@ app.layout = html.Div(
 
 
                                             ], 
-                                            className = "wrapper"),
+                                            className = "wrapper2"),
                                   
                         ],
 className="HTML"
