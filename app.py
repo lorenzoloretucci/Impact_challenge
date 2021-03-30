@@ -162,7 +162,7 @@ def display_color(waste):
 
 ###############  Dataframe ############################## 
 choose_len = 20
-choose_len2 = 14
+choose_len2 = 13
 
 Type_report = ['Report', "Issiue", "NaN", "Injury"]
 Type_name = ['Anil',"Giuliano", "Marco", "Alberto", 
@@ -251,7 +251,7 @@ home = html.Div(
                                             #Report#
                                             html.Div([
                                                     # reportTitle
-                                                    #html.H3('Real-Time Reports',  className = 'wintitle'),
+                                                    html.H3('Real-Time Reports',  className = 'wintitle'),
                                                      #Table
                                                     dash_table.DataTable(id='table',columns=[{"name": i, "id": i} for i in df.columns],data=df.to_dict('records')),
                                                     
@@ -325,12 +325,7 @@ home = html.Div(
 
                                                     ],
                                                     className="right-stats")
-                                            
-
-                            
-
-
-
+            
                                             ], 
                                             className = "wrapper2"),
                                   
@@ -338,9 +333,22 @@ home = html.Div(
 className="HTML"
 )
 
+BIN = html.Div(children=[
+                        #Table 1 
+                        html.Div(children = [
+                                            
+
+                                            ]),
+                        
+                        #Prediction
+
+                        ])
+
 content = html.Div(id="page-content", className="content")
 
 app.layout = html.Div([dcc.Location(id="url"), sidebar, content])
+
+
 
 
 
@@ -349,7 +357,7 @@ def render_page_content(pathname):
     if pathname == "/":
         return home
     elif pathname == "/page-1":
-        return html.P("This is the content of page 1. Yay!")
+        return BIN
     elif pathname == "/page-2":
         return html.P("Oh cool, this is page 2!")
     # If the user tries to reach a different page, return a 404 message
