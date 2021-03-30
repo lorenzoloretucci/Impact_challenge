@@ -49,10 +49,10 @@ available_garbage_trucks = garbage_trucks['available'].sum()  # only available g
 
 # predictor = MakePrediction('.')
 
-GARBAGE_LABELS = []
+GARBAGE_LABELS = [{'label': 'None', 'value': -1}]
 for k in garbage_trucks['truck_id']:
     GARBAGE_LABELS.append({'label': f'Truck #{k + 1}', 'value': str(k)})
-SHOW_ROUTES = {0: True, 1: False, 2: False, 3: False, 4: False, 5: False}
+SHOW_ROUTES = {0: False, 1: False, 2: False, 3: False, 4: False, 5: False}
 
 # precompute paths
 #bins_full = predictor.prediction()
@@ -76,7 +76,7 @@ def update_map(n):
     for i, p in enumerate(POSITIONS):
         if i not in bins_full:
             folium.Marker(location=[p[0], p[1]],
-                        icon = folium.features.CustomIcon( "https://i.imgur.com/LXXgKM4.png", #empty bins icon
+                        icon = folium.features.CustomIcon( "https://i.imgur.com/5ZpuGr5.png", #empty bins icon
                                                         icon_size=(20, 20)),
                                                         popup=f'Garbage bin #{int(i)}'
                         ).add_to(rome_map)
@@ -126,14 +126,13 @@ def update_map(n):
 
 @app.callback(
     dash.dependencies.Output('ignore-me', 'children'),
-    [dash.dependencies.Input('submit-val', 'n_clicks')],
-    [dash.dependencies.State('input-on-submit', 'value')])
-def update_output(n_clicks, value):
+    [dash.dependencies.Input('input-on-submit', 'value')])
+def update_output(value):
     global SHOW_ROUTES
     truck_n = int(value)
-    if truck_n in SHOW_ROUTES.keys():
-        for k in SHOW_ROUTES.keys():
-            SHOW_ROUTES[k] = False
+    for k in SHOW_ROUTES.keys():
+        SHOW_ROUTES[k] = False
+    if truck_n != -1 and truck_n in SHOW_ROUTES.keys():
         SHOW_ROUTES[truck_n] = True
     return ''
 
@@ -203,7 +202,7 @@ wastes = df_right.waste.unique()
 
 sidebar = html.Div(
     [
-        html.Img(src = "https://i.imgur.com/lz16RME.png", className="Logo"), #Logo
+        html.Img(src = "https://i.imgur.com/jwzOPDb.png", className="Logo"), #Logo
         html.Hr( className = "sidebar_divisor"),
         dbc.Nav(
             [
@@ -240,10 +239,9 @@ home = html.Div(
                                                         #html.H3('Path Map',  className = 'wintitle'),
                                                         html.Iframe(id = 'map', srcDoc = None, className = 'inframe_map' ),
                                             #Button div
-                                                        html.Div([dcc.Dropdown(id='input-on-submit', options = GARBAGE_LABELS, value='0', className = 'nav_map' ),
-                                                                    html.Button('Submit', id='submit-val', n_clicks=0, className = 'Button_map' ),
+                                                        html.Div([dcc.Dropdown(id='input-on-submit', options = GARBAGE_LABELS, value='-1', className = 'nav_map' ),
                                                                     html.Div(id='ignore-me', hidden=True)
-                                                                 ])
+                                                        ])
                                                      ],
                                                         
                                                     className = "Map"),
