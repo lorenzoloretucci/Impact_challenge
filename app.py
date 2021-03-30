@@ -52,7 +52,7 @@ available_garbage_trucks = garbage_trucks['available'].sum()  # only available g
 GARBAGE_LABELS = []
 for k in garbage_trucks['truck_id']:
     GARBAGE_LABELS.append({'label': f'Truck #{k + 1}', 'value': str(k)})
-SHOW_ROUTES = {0: False, 1: False, 2: False, 3: False, 4: False, 5: False}
+SHOW_ROUTES = {0: True, 1: False, 2: False, 3: False, 4: False, 5: False}
 
 # precompute paths
 #bins_full = predictor.prediction()
@@ -207,7 +207,7 @@ sidebar = html.Div(
         html.Hr( className = "sidebar_divisor"),
         dbc.Nav(
             [
-                dbc.NavLink(html.Img(src="https://i.imgur.com/rCuGj8H.png", width=40, height=40, className="home"), href="/", active="exact", className = 'nav'), #Home
+                dbc.NavLink(html.Img(src="https://i.imgur.com/rCuGj8H.png", width=41, height=40, className="home"), href="/", active="exact", className = 'nav'), #Home
                 dbc.NavLink(html.Img(src = "https://i.imgur.com/LXXgKM4.png", width=40, height=40, className="bins"), href="/page-1", active="exact",  className = 'nav'),# Bins
                 dbc.NavLink(html.Img(src = "https://i.imgur.com/ZOFEbQ9.png", width=40, height=40, className="truks"), href="/page-2", active="exact",  className = 'nav'), #Truks
                 dbc.NavLink(html.Img(src = "https://i.imgur.com/qrIKKYb.png", width=40, height=40, className="info"), href="/page-2", active="exact",  className = 'nav'), #info
@@ -219,7 +219,6 @@ sidebar = html.Div(
     ],
     className='sidebar',
 )
-
 
 
 
@@ -275,40 +274,54 @@ home = html.Div(
                         html.Div(children = [
                                             ##left-stats
                                             html.Div([ 
-                                                    #html.H3('Real-time Trucks stats', className = 'wintitle'),
-                                                    html.P("Names:", className = 'name_selector'),
-                                                    dcc.Dropdown(
-                                                                id='names', 
-                                                                value='truck_fuel_situation', 
-                                                                options=[{'value': x, 'label': x} for x in ['truck_fuel_situation', 'time']],
-                                                                clearable=False
-                                                                ),
-                                                    html.P("Values:", className = 'name_selector'),
-                                                    dcc.Dropdown(
-                                                                id='values', 
-                                                                value='Fuel_L', 
-                                                                options=[{'value': x, 'label': x} for x in ['Fuel_L', 'mount_mc']],
-                                                                clearable=False
-                                                                ),
+                                                        html.Div(children = [
+                                                                            html.H3("Trucks Situation"),
+                                                                            html.P("Names:", className = 'name_selector'),
+                                                                                dcc.Dropdown(
+                                                                                            id='names', 
+                                                                                            value='truck_fuel_situation', 
+                                                                                            options=[{'value': x, 'label': x} for x in ['truck_fuel_situation', 'time']],
+                                                                                            clearable=False
+                                                                                            ),
+                                                                                html.P("Values:", className = 'name_selector'),
+                                                                                dcc.Dropdown(
+                                                                                            id='values', 
+                                                                                            value='Fuel_L', 
+                                                                                            options=[{'value': x, 'label': x} for x in ['Fuel_L', 'mount_mc']],
+                                                                                            clearable=False
+                                                                                            ),
+
+                                                                            ], className = 'nav_r_stats'),
+                                                        html.Div(children =[
+                                                                            dcc.Graph(id="pie-chart", className= 'graph', config = {"responsive": True, "autosizable": True, "fillFrame": False})
+
+                                                                             ], className = "graph")
+                                                
                                                     
-                                                    dcc.Graph(id="pie-chart", className= 'graph', config = {"responsive": True, "autosizable": True, "fillFrame": False}),
                                                   
                                                     ],
                                                     className = "left-stats"),
                                             #right Stats
                                             html.Div([
-                                                    #html.H3('Real-Time bin stats',  className = 'wintitle'),
-                                        
-                                                    html.P("Waste:", className = 'name_selector'),
-                                                    dcc.Dropdown(
-                                                                id='waste', 
-                                                                value='PET', 
-                                                                options=[{'value': x, 'label': x} for x in wastes],
-                                                                clearable=False
-                                                                ),
+                                                        html.Div(children = [
+                                                                            html.H3("Waste Situation"),
+                                                                            html.P("Waste:", className = 'name_selector'),
+                                                                            dcc.Dropdown(
+                                                                                    id='waste', 
+                                                                                    value='PET', 
+                                                                                    options=[{'value': x, 'label': x} for x in wastes],
+                                                                                    clearable=False
+                                                                                    ),
 
-                                                       dcc.Graph(id="histo", className= 'graph', config = {"responsive": True, "autosizable": True, "fillFrame": False}),
-                                                            
+                                                                                ], className = "nav_l_stats"),
+
+                                                        html.Div(children =[
+                                                                             dcc.Graph(id="histo", className= 'graph', config = {"responsive": True, "autosizable": True, "fillFrame": False}),
+
+
+                                                                            ], className = 'graph')
+                                
+                                        
 
                                                     ],
                                                     className="right-stats")
