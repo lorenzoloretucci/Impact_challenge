@@ -20,12 +20,13 @@ ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    width: 60px;
     margin-top: 5px;
   }
   
-li a {
+.nav {
     display: block;
+    height: 40px;
+    margin-top: 8px;
   }
 
 .sidebar_divisor{
@@ -38,6 +39,21 @@ li a {
     display: center;
 
 }
+
+.home.bins.truks.info{
+    border: none;
+    outline: none;
+    padding: 10px 16px;
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+
+.active, .home.bins.truks.info:hover {
+    background-color: grey;
+    height: 40px;
+    width: 40px;
+    color: white;
+  }
 .content{
     margin-left: 2.5rem;
     margin-right: 1px;
@@ -102,7 +118,7 @@ li a {
 
 
 .Map {
-    flex: 1;
+    flex: 60%;
     border: 3px solid #90beab ;
     padding:10px;
       }
@@ -114,7 +130,7 @@ li a {
 
     
 .Report {
-    flex: 1;
+    flex: 40%;
     border: 3px solid #90beab ;
     padding: 10px
         }   

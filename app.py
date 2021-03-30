@@ -35,7 +35,7 @@ UPDATE_INTERVAL = config['GENERAL'].getint('UPDATE_INTERVAL')
 app = dash.Dash(name='UnWaste! FrontEnd')
 server = app.server
 app.title = "UnWaste! Project"
-
+app.config.suppress_callback_exceptions = True
 # EXTERNAL SETTINGS
 # should be loaded elsewhere and imported here / in a submodule
 
@@ -207,10 +207,10 @@ sidebar = html.Div(
         html.Hr( className = "sidebar_divisor"),
         dbc.Nav(
             [
-                dbc.NavLink(html.Img(src="https://i.imgur.com/rCuGj8H.png", width=40, height=40), href="/", active="exact"), #Home
-                dbc.NavLink(html.Img(src = "https://i.imgur.com/LXXgKM4.png", width=40, height=40), href="/page-1", active="exact"),# Bins
-                dbc.NavLink(html.Img(src = "https://i.imgur.com/ZOFEbQ9.png", width=40, height=40, style={"margin-right": "100"}), href="/page-2", active="exact"), #Truks
-                dbc.NavLink(html.Img(src = "https://i.imgur.com/qrIKKYb.png", width=40, height=40), href="/page-2", active="exact"), #info
+                dbc.NavLink(html.Img(src="https://i.imgur.com/rCuGj8H.png", width=40, height=40, className="home"), href="/", active="exact", className = 'nav'), #Home
+                dbc.NavLink(html.Img(src = "https://i.imgur.com/LXXgKM4.png", width=40, height=40, className="bins"), href="/page-1", active="exact",  className = 'nav'),# Bins
+                dbc.NavLink(html.Img(src = "https://i.imgur.com/ZOFEbQ9.png", width=40, height=40, className="truks"), href="/page-2", active="exact",  className = 'nav'), #Truks
+                dbc.NavLink(html.Img(src = "https://i.imgur.com/qrIKKYb.png", width=40, height=40, className="info"), href="/page-2", active="exact",  className = 'nav'), #info
             ],
             vertical=True,
             pills=True, 
