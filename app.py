@@ -15,6 +15,7 @@ import plotly.express as px
 import random
 from backend.path_planning import path_planning
 from backend.zone_splitting import kmeans_subdivision
+import plotly.graph_objects as go
 #from backend.prediction import MakePrediction
 #import tensorflow as tf
 
@@ -200,8 +201,8 @@ wastes = df_right.waste.unique()
 
 ####### Page Bins Dataframes######
 bins_pred_df = pd.read_csv('DATABASE\coords_groups.csv')
-
-prediction = pd.read_csv("DATABASE\latest_time_obs.csv")
+bins_pred_df['latest_pred'] = [1. if i in bins_full else 0. for i in range(len(POSITIONS))]
+bins_past_state = pd.read_csv("DATABASE\latest_time_obs.csv")
 
 ###########################################################
 ###########SIDEBAR  
@@ -212,7 +213,7 @@ sidebar = html.Div(
         html.Hr( className = "sidebar_divisor"),
         dbc.Nav(
             [
-                dbc.NavLink(html.Img(src="https://i.imgur.com/rCuGj8H.png", width=41, height=40, className="home"), href="/", active="exact", className = 'nav'), #Home
+                dbc.NavLink(html.Img(src="https://i.imgur.com/rCuGj8H.png", width=40, height=40, className="home"), href="/", active="exact", className = 'nav'), #Home
                 dbc.NavLink(html.Img(src = "https://i.imgur.com/LXXgKM4.png", width=40, height=40, className="bins"), href="/page-1", active="exact",  className = 'nav'),# Bins
                 dbc.NavLink(html.Img(src = "https://i.imgur.com/ZOFEbQ9.png", width=40, height=40, className="truks"), href="/page-2", active="exact",  className = 'nav'), #Truks
                 dbc.NavLink(html.Img(src = "https://i.imgur.com/qrIKKYb.png", width=40, height=40, className="info"), href="/page-3", active="exact",  className = 'nav'), #info
@@ -343,21 +344,28 @@ BIN = html.Div(children=[
                         #Table 1 
                         html.Div(children = [
                                                 html.H3("Bins"),
-                                                html.Div( 
-                                                        dash_table.DataTable(
-                                                    id = 'datatatable-interactivity',
-                                                    columns=[ {"name": i, "id": i} for i in bins_pred_df.columns],
-                                                            data=bins_pred_df.to_dict('records'),
-                                                            column_selectable="single",
-                                                            row_selectable="multi",
-                                                            selected_columns=[],
-                                                            selected_rows=[],
-                                                            page_action="native",
-                                                            page_current= 0,
-                                                            page_size= 10
-                                                                            ),
+                                                html.Div(
+                                                    dash_table.DataTable(
+                                                        id='datatable-interactivity',
+                                                        columns=[
+                                                            {"name": i, "id": i, "selectable": True} for i in bins_pred_df.columns
+                                                        ],
+                                                        data=bins_pred_df.to_dict('records'),
+                                                        editable=True,
+                                                        filter_action="native",
+                                                        sort_action="native",
+                                                        sort_mode="multi",
+                                                        column_selectable="single",
+                                                        row_selectable="single",
+                                                        row_deletable=False,
+                                                        selected_columns=[],
+                                                        selected_rows=[],
+                                                        page_action="native",
+                                                        page_current= 0,
+                                                        page_size= 10,
+                                                    ),
                                                         className = 'bindata'
-                                                        )
+                                                        ),
 
 
                                             ]),
@@ -375,12 +383,33 @@ BIN = html.Div(children=[
 
 
 @app.callback(
-    Output("line-chart", "figure"), 
-    [Input('datatable-interactivity', "derived_virtual_selected_rows")])
-def update_line_chart(continents):
-    mask = df.continent.isin(continents)
-    fig = px.line(df[mask], 
-        x="year", y="lifeExp", color='country')
+    Output('datatable-interactivity', 'style_data_conditional'),
+    Input('datatable-interactivity', 'selected_rows')
+)
+def update_styles(selected_rows):
+    return [{
+        'if': { 'row_index': i },
+        'background_color': '#D2F3FF'
+    } for i in selected_rows]
+
+
+@app.callback(
+    Output("line-chart", "figure"),
+    [Input('datatable-interactivity', 'selected_rows')])
+def update_line_chart(selected_rows):
+    fig = go.Figure()
+    fig.update_layout(title='Past and predicted garbage bin fullness',
+                   yaxis_title='Fullness (%)',
+                   xaxis_title='Timesteps (~4 hrs)')
+    if len(selected_rows) > 0:
+        selected_row = selected_rows[0]
+        past_states = bins_past_state.iloc[selected_row].values[1:]
+        predicted_state = bins_pred_df.iloc[selected_row]['latest_pred']
+        fig.add_trace(go.Scatter(x=[i for i in range(len(past_states))], y=past_states, name=f'Bin #{selected_rows[0]}',
+                            line = dict(color='royalblue', width=4, dash='dash')))
+        
+        fig.add_trace(go.Scatter(x=[len(past_states) - 1, len(past_states)], y=[past_states[-1], predicted_state], name=f'Pred. Bin #{selected_rows[0]}',
+                            line = dict(color='darkolivegreen', width=4, dash='dash')))
     return fig
 
 content = html.Div(id="page-content", className="content")
