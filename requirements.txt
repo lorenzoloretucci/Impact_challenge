@@ -8,3 +8,4 @@ geopy
 sklearn
 gunicorn
 dash_bootstrap_components
+geopy
