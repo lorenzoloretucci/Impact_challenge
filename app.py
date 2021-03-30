@@ -343,6 +343,7 @@ className="HTML"
 BIN = html.Div(children=[
                         #Table 1 
                         html.Div(children = [
+                                                html.H1('Bins prediction and data visualization'),
                                                 html.H3("Bins"),
                                                 html.Div(
                                                     dash_table.DataTable(
@@ -359,7 +360,7 @@ BIN = html.Div(children=[
                                                         row_selectable="single",
                                                         row_deletable=False,
                                                         selected_columns=[],
-                                                        selected_rows=[],
+                                                        selected_rows=[0],
                                                         page_action="native",
                                                         page_current= 0,
                                                         page_size= 10,
@@ -381,6 +382,28 @@ BIN = html.Div(children=[
 
                         ])
 
+TRUCKS = html.Div(children=[
+    html.Div(children=[
+        html.H1('Trucks overview')
+    ]),
+    html.P('Here you can find all the informations about the active trucks.'),
+    html.Div(children=[
+        html.H3("Looks like there's nothing here (yet)")
+    ])
+])
+
+HELP = html.Div(children=[
+    html.Div(children=[
+        html.H1('This is the HELP page')
+    ]),
+    html.Div(children=[
+        html.H3('What is this?'),
+        html.H3('How can I predict garbage filling?'),
+        html.H3('Where can I see the trucks?'),
+        html.H3('How does the dashboard work?'),
+        html.H3('Where can I get some support?')
+    ])
+])
 
 @app.callback(
     Output('datatable-interactivity', 'style_data_conditional'),
@@ -427,9 +450,9 @@ def render_page_content(pathname):
     elif pathname == "/page-1":
         return BIN
     elif pathname == "/page-2":
-        return html.P("Oh cool, this is page 2!")
+        return TRUCKS
     elif pathname == "/page-3":
-        return html.P("Oh cool, this is page 3333!")
+        return HELP
     # If the user tries to reach a different page, return a 404 message
     return dbc.Jumbotron(
         [
