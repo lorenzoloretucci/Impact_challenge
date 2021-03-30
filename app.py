@@ -76,13 +76,13 @@ def update_map(n):
     for i, p in enumerate(POSITIONS):
         if i not in bins_full:
             folium.Marker(location=[p[0], p[1]],
-                        icon = folium.features.CustomIcon( "https://i.imgur.com/LXXgKM4.png",
+                        icon = folium.features.CustomIcon( "https://i.imgur.com/LXXgKM4.png", #empty bins icon
                                                         icon_size=(20, 20)),
                                                         popup=f'Garbage bin #{int(i)}'
                         ).add_to(rome_map)
         else:
             folium.Marker(location=[p[0], p[1]],
-                        icon = folium.features.CustomIcon( "https://i.imgur.com/y8mMdnB.png",
+                        icon = folium.features.CustomIcon( "https://i.imgur.com/VL8EMe6.png", #full bins icon
                                                         icon_size=(20, 20)),
                                                         popup=f'Garbage bin #{int(i)}'
                         ).add_to(rome_map)
@@ -91,7 +91,7 @@ def update_map(n):
     active_trucks_pos = garbage_trucks.loc[garbage_trucks['available'] == 1, ['truck_id', 'latitude','longitude']].values
     for pos in active_trucks_pos:
         folium.Marker(location=[pos[1], pos[2]],
-                                icon = folium.features.CustomIcon( "https://i.imgur.com/qsFNVJj.png",
+                                icon = folium.features.CustomIcon( "https://i.imgur.com/qsFNVJj.png", #active trucks
                                                                 icon_size=(35, 35)),
                                                                 popup=f'Garbage truck #{int(pos[0] + 1)}'
                     ).add_to(rome_map)
@@ -99,7 +99,7 @@ def update_map(n):
     inactive_trucks_pos = garbage_trucks.loc[garbage_trucks['available'] == 0, ['truck_id', 'latitude','longitude']].values
     for pos in inactive_trucks_pos:
         folium.Marker(location=[pos[1], pos[2]],
-                                icon = folium.features.CustomIcon( "https://i.imgur.com/eSyUS0b.png",
+                                icon = folium.features.CustomIcon( "https://i.imgur.com/eSyUS0b.png", #inactive trucks
                                                                 icon_size=(35, 35)),
                                                                 popup=f'Garbage truck #{int(pos[0] + 1)}'
                     ).add_to(rome_map)
