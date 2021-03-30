@@ -343,7 +343,7 @@ className="HTML"
 BIN = html.Div(children=[
                         #Table 1 
                         html.Div(children = [
-                                                html.H1('Bins prediction and data visualization'),
+                                                
                                                 html.H3("Bins"),
                                                 html.Div(
                                                     dash_table.DataTable(
@@ -365,22 +365,23 @@ BIN = html.Div(children=[
                                                         page_current= 0,
                                                         page_size= 10,
                                                     ),
-                                                        className = 'bindata'
+                                                        
                                                         ),
 
 
-                                            ]),
+                                            ], className = 'bindata'),
                         
                         #Prediction
                         html.Div(children= [
                                             html.H3("Forecast Plot"),
-                                            dcc.Graph(id="line-chart")
+                                            dcc.Graph(id="line-chart", className= 'graph_bin', config = {"responsive": True, "autosizable": True, "fillFrame": False})
 
-                                            ]
+                                            ], 
+                                className = 'graph_bin'
 
                                 )
 
-                        ])
+                        ], className = "wrapper3")
 
 TRUCKS = html.Div(children=[
     html.Div(children=[
