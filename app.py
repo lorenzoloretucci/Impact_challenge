@@ -57,7 +57,7 @@ SHOW_ROUTES = {0: False, 1: False, 2: False, 3: False, 4: False, 5: False}
 # precompute paths
 #bins_full = predictor.prediction()
 
-bins_full = np.array([0,  1,  2,  3,  4,  5,  6,  7, 12, 14, 19, 21, 22, 23])
+bins_full = np.array([0,  1,  2,  3,  4,  5,  6,  7, 12, 14, 19, 21, 22, 23]) 
 clusters, centers = kmeans_subdivision(bins_full, '.', available_garbage_trucks)
 paths = path_planning(clusters, centers, '.')
 
@@ -197,6 +197,12 @@ data_right = {"waste": [random.choice(waste_type) for i in range(choose_len)],
 
 df_right = pd.DataFrame(data_right)
 wastes = df_right.waste.unique()
+
+####### Page Bins Dataframes######
+bins_pred_df = pd.read_csv('DATABASE\coords_groups.csv')
+
+prediction = pd.read_csv("DATABASE\latest_time_obs.csv")
+
 ###########################################################
 ###########SIDEBAR  
 
@@ -209,7 +215,7 @@ sidebar = html.Div(
                 dbc.NavLink(html.Img(src="https://i.imgur.com/rCuGj8H.png", width=41, height=40, className="home"), href="/", active="exact", className = 'nav'), #Home
                 dbc.NavLink(html.Img(src = "https://i.imgur.com/LXXgKM4.png", width=40, height=40, className="bins"), href="/page-1", active="exact",  className = 'nav'),# Bins
                 dbc.NavLink(html.Img(src = "https://i.imgur.com/ZOFEbQ9.png", width=40, height=40, className="truks"), href="/page-2", active="exact",  className = 'nav'), #Truks
-                dbc.NavLink(html.Img(src = "https://i.imgur.com/qrIKKYb.png", width=40, height=40, className="info"), href="/page-2", active="exact",  className = 'nav'), #info
+                dbc.NavLink(html.Img(src = "https://i.imgur.com/qrIKKYb.png", width=40, height=40, className="info"), href="/page-3", active="exact",  className = 'nav'), #info
             ],
             vertical=True,
             pills=True, 
@@ -336,14 +342,46 @@ className="HTML"
 BIN = html.Div(children=[
                         #Table 1 
                         html.Div(children = [
-                                                html.H3("Bins")
+                                                html.H3("Bins"),
+                                                html.Div( 
+                                                        dash_table.DataTable(
+                                                    id = 'datatatable-interactivity',
+                                                    columns=[ {"name": i, "id": i} for i in bins_pred_df.columns],
+                                                            data=bins_pred_df.to_dict('records'),
+                                                            column_selectable="single",
+                                                            row_selectable="multi",
+                                                            selected_columns=[],
+                                                            selected_rows=[],
+                                                            page_action="native",
+                                                            page_current= 0,
+                                                            page_size= 10
+                                                                            ),
+                                                        className = 'bindata'
+                                                        )
 
 
                                             ]),
                         
                         #Prediction
+                        html.Div(children= [
+                                            html.H3("Forecast Plot"),
+                                            dcc.Graph(id="line-chart")
+
+                                            ]
+
+                                )
 
                         ])
+
+
+@app.callback(
+    Output("line-chart", "figure"), 
+    [Input('datatable-interactivity', "derived_virtual_selected_rows")])
+def update_line_chart(continents):
+    mask = df.continent.isin(continents)
+    fig = px.line(df[mask], 
+        x="year", y="lifeExp", color='country')
+    return fig
 
 content = html.Div(id="page-content", className="content")
 
@@ -361,6 +399,8 @@ def render_page_content(pathname):
         return BIN
     elif pathname == "/page-2":
         return html.P("Oh cool, this is page 2!")
+    elif pathname == "/page-3":
+        return html.P("Oh cool, this is page 3333!")
     # If the user tries to reach a different page, return a 404 message
     return dbc.Jumbotron(
         [
