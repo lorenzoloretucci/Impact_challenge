@@ -76,13 +76,13 @@ def update_map(n):
     for i, p in enumerate(POSITIONS):
         if i not in bins_full:
             folium.Marker(location=[p[0], p[1]],
-                        icon = folium.features.CustomIcon( "https://i.imgur.com/5ZpuGr5.png", #empty bins icon
+                        icon = folium.features.CustomIcon( "https://i.imgur.com/8eX716p.png", #empty bins icon
                                                         icon_size=(20, 20)),
                                                         popup=f'Garbage bin #{int(i)}'
                         ).add_to(rome_map)
         else:
             folium.Marker(location=[p[0], p[1]],
-                        icon = folium.features.CustomIcon( "https://i.imgur.com/VL8EMe6.png", #full bins icon
+                        icon = folium.features.CustomIcon( "https://i.imgur.com/M8H3hnt.png", #full bins icon
                                                         icon_size=(20, 20)),
                                                         popup=f'Garbage bin #{int(i)}'
                         ).add_to(rome_map)
@@ -238,7 +238,9 @@ home = html.Div(
                                             html.Div([
                                                         #html.H3('Path Map',  className = 'wintitle'),
                                                         html.Iframe(id = 'map', srcDoc = None, className = 'inframe_map' ),
+
                                             #Button div
+                                                        html.P("Select truck path:",className = 'name_selector'),
                                                         html.Div([dcc.Dropdown(id='input-on-submit', options = GARBAGE_LABELS, value='-1', className = 'nav_map' ),
                                                                     html.Div(id='ignore-me', hidden=True)
                                                         ])
@@ -334,7 +336,8 @@ className="HTML"
 BIN = html.Div(children=[
                         #Table 1 
                         html.Div(children = [
-                                            
+                                                html.H3("Bins")
+
 
                                             ]),
                         
