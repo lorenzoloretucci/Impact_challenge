@@ -87,15 +87,11 @@ for k in garbage_trucks['truck_id']:
     GARBAGE_LABELS.append({'label': f'Truck #{k + 1}', 'value': str(k)})
 SHOW_ROUTES = {i: False for i in range(len(garbage_trucks))}
 
-# Compute predictions at next timestep
-# predictor = MakePrediction(' .')
-bins_full = np.array([0, 1, 2, 3, 4, 5, 6, 7, 12, 14, 19, 21, 22, 23])  # otherwise, predictor.prediction()
-# update with last prediction
-bins_pred_df['latest_pred'] = [1. if i in bins_full else 0. for i in range(len(POSITIONS))]
-# precompute paths
-clusters, centers = kmeans_subdivision(bins_full, '.', available_garbage_trucks)
-paths = path_planning(clusters, centers, '.')
-
+bins_full = []
+paths = {'trucks': [],
+         'zone_0': []
+        }
+bins_pred_df['latest_pred'] = [0. for _ in range(len(POSITIONS))]
 
 # DASH CALLBACKS
 # Update the Folium map
@@ -111,13 +107,13 @@ def update_map(n):
     for i, p in enumerate(POSITIONS):
         if i not in bins_full:
             folium.Marker(location=[p[0], p[1]],
-                          icon=folium.features.CustomIcon("https://i.imgur.com/8eX716p.png",  # empty bins icon
+                          icon=folium.features.CustomIcon("https://i.imgur.com/7Z5nOWb.png",  # empty bins icon
                                                           icon_size=(20, 20)),
                           popup=f'Garbage bin #{int(i)}'
                           ).add_to(rome_map)
         else:
             folium.Marker(location=[p[0], p[1]],
-                          icon=folium.features.CustomIcon("https://i.imgur.com/M8H3hnt.png",  # full bins icon
+                          icon=folium.features.CustomIcon("https://i.imgur.com/umB38Re.png",  # full bins icon
                                                           icon_size=(20, 20)),
                           popup=f'Garbage bin #{int(i)}'
                           ).add_to(rome_map)
@@ -177,6 +173,21 @@ def update_output(value):
         SHOW_ROUTES[truck_n] = True
     return ''
 
+@app.callback(
+    dash.dependencies.Output('ignore-me2', 'children'),
+    dash.dependencies.Input('prediction-submit', 'n_clicks'))
+def update_predictions(n_clicks):
+    global bins_full, paths
+    # Compute predictions at next timestep
+    # predictor = MakePrediction(' .')
+    if n_clicks > 0:
+        # bins_full = otherwise, predictor.prediction()
+        bins_full = np.random.choice(np.arange(len(POSITIONS)), size=len(POSITIONS) * 50 // 100, replace=False)
+        # update with last prediction
+        bins_pred_df['latest_pred'] = [1. if i in bins_full else 0. for i in range(len(POSITIONS))]
+        # precompute paths
+        clusters, centers = kmeans_subdivision(bins_full, '.', available_garbage_trucks)
+        paths = path_planning(clusters, centers, '.')
 
 # Generate / Update the trucks status' chart
 @app.callback(
@@ -290,10 +301,20 @@ home = html.Div(
             html.Div([
                 html.Iframe(id='map', srcDoc=None, className='inframe_map'),
                 # Route selection
-                html.P("Select truck path:", className='name_selector'),
-                html.Div([dcc.Dropdown(id='input-on-submit', options=GARBAGE_LABELS, value='-1', className='nav_map'),
-                          html.Div(id='ignore-me', hidden=True)
-                          ])
+                html.Div([
+                    html.Div([
+                        html.P("Select truck path:", className='name_selector'),
+                        html.Div([dcc.Dropdown(id='input-on-submit', options=GARBAGE_LABELS, value='-1', className='nav_map'),
+                                html.Div(id='ignore-me', hidden=True)
+                                ], style={"width": "100%"})
+                    ], className="left-stats1"),
+                    html.Div([
+                        html.P("Generate prediction:", className='name_selector'),
+                        html.Div([html.Button('GENERATE', id='prediction-submit', n_clicks=0),
+                                html.Div(id='ignore-me2', hidden=True)
+                                ], style={"width": "100%"})
+                    ], className="right-stats1")                   
+                ], className="wrapper4")
             ], className="Map"),
             # Report#
             html.Div([
