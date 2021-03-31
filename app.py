@@ -200,9 +200,9 @@ df_right = pd.DataFrame(data_right)
 wastes = df_right.waste.unique()
 
 ####### Page Bins Dataframes######
-bins_pred_df = pd.read_csv('DATABASE\\coords_groups.csv')
+bins_pred_df = pd.read_csv('./DATABASE/coords_groups.csv')
 bins_pred_df['latest_pred'] = [1. if i in bins_full else 0. for i in range(len(POSITIONS))]
-bins_past_state = pd.read_csv("DATABASE\\latest_time_obs.csv")
+bins_past_state = pd.read_csv("./DATABASE/latest_time_obs.csv")
 
 ###########################################################
 ###########SIDEBAR  
