@@ -197,7 +197,7 @@ def update_predictions(n_clicks):
     [Input("names", "value"),
      Input("values", "value")])
 def generate_chart(names, values):
-    fig = px.pie(truck_status_df, values=values, names=names)
+    fig = px.pie(truck_status_df, values=values, names=names, color_discrete_sequence=px.colors.sequential.Jet)
     return fig
 
 
@@ -382,9 +382,16 @@ home = html.Div(
 )
 
 # bins
-BIN = html.Div(children=[
+BIN = html.Div( children = [ 
+    html.Div( children = [
+        html.H1('Bin Prediction'),
+        html.P("This page shows at the moment the prediction of bin's state"),
+        html.P("In future we will update different windows to manage other bins data....")
+    ], className = "trucks_page" ),
+    html.Div(children=[
     # Table 1
     html.Div(children=[
+         
         html.H3("Bins"),
         html.Div(
             dash_table.DataTable(
@@ -415,6 +422,9 @@ BIN = html.Div(children=[
                   config={"responsive": True, "autosizable": True, "fillFrame": False})
         ], className='graph_bin')
     ], className="wrapper3"
+)
+
+]
 )
 # trucks
 TRUCKS = html.Div(children=[
