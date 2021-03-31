@@ -137,7 +137,16 @@ ul {
     min-height: 87%;
     }
 
-    
+.generate_button{
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif ;
+    transition-duration: 0.3s;
+    border-radius: 8px
+}
+.generate_button:hover{
+    background-color: #3b5998; 
+    color: white;
+}
+
 .Report {
     flex: 40%;
     border: 3px solid #90beab ;
@@ -212,3 +221,14 @@ ul {
     height: 100%;
 }
 
+
+.trucks_page{
+    margin-left: 20px;
+    margin-top: 30px;
+}
+
+.Help_page{
+    margin-left: 20px;
+    margin-top: 30px;
+
+}

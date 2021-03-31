@@ -157,7 +157,7 @@ def update_map(n):
             # swap lat/long for folium
             points = [[p[1], p[0]] for p in route['features'][0]['geometry']['coordinates']]
 
-            folium.PolyLine(points, color='red', weight=10, opacity=0.8).add_to(rome_map)
+            folium.PolyLine(points, color='#3b5998', weight=8, opacity=0.6).add_to(rome_map)
 
     return rome_map._repr_html_()
 
@@ -312,9 +312,9 @@ home = html.Div(
                     ], className="left-stats1"),
                     html.Div([
                         html.P("Generate prediction:", className='name_selector'),
-                        html.Div([html.Button('GENERATE', id='prediction-submit', n_clicks=0),
+                        html.Div([html.Button('GENERATE', id='prediction-submit', n_clicks=0, className ='generate_button'),
                                 html.Div(id='ignore-me2', hidden=True)
-                                ], style={"width": "100%"})
+                                ], style={"width": "100%", "margin-top": "10px"})
                     ], className="right-stats1")                   
                 ], className="wrapper4")
             ], className="Map"),
@@ -424,10 +424,11 @@ TRUCKS = html.Div(children=[
     html.P('Here you can find all the informations about the active trucks.'),
     html.Div(children=[
         html.H3("Looks like there's nothing here (yet)"),
-        html.P("In the future, here you will find all information and settings regarding the path planning.For example, you will be able to choose the subset of bins or the number of \"zones\" assigned to the trucks."),
+        html.P("In the future, here you will find all information and settings regarding the path planning."),
+        html.P("For example, you will be able to choose the subset of bins or the number of \"zones\" assigned to the trucks."),
         html.P("You will be able to also explore through various statistical and analysis results about the data you collected.")
     ])
-])
+], className= "trucks_page")
 # help
 HELP = html.Div(children=[
     html.Div(children=[
@@ -445,7 +446,7 @@ HELP = html.Div(children=[
         html.H3('Where can I get some support?'),
         html.P("You can ask for support at totally-valid-mail@notatest.com.")
     ])
-])
+], className = "Help_page")
 # main content
 content = html.Div(id="page-content", className="content")
 
