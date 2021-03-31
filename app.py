@@ -52,29 +52,31 @@ garbage_trucks = pd.read_csv('DATABASE/trucks_coords.csv')
 bins_pred_df = pd.read_csv('./DATABASE/coords_groups.csv')  # copy for different display page
 bins_past_state = pd.read_csv("./DATABASE/latest_time_obs.csv")
 # Trucks report Dataframe creation 
-choose_len = 20
-choose_len2 = 13
+trucks_report_df = garbage_trucks.copy()
 type_report = ['Report', "Issue", "not-specified", "Injury"]
 type_name = ['Anil', "Giuliano", "Marco", "Alberto", "Giuliana", "Maria", "Paola", "Ignazio"]
-data = {"Report_id": [random.randrange(1257, 3679, 1) for i in range(choose_len2)],
-        "Truck_id": [random.randrange(1, 60, 1) for i in range(choose_len2)],
-        "Type": [random.choice(type_report) for i in range(choose_len2)],
-        "Operator": [random.choice(type_name) for i in range(choose_len2)]}
-trucks_report_df = pd.DataFrame(data)
+driver_names = [np.random.choice(type_name) for _ in range(len(trucks_report_df))]
+truck_reports = [np.random.choice(type_report) if trucks_report_df['available'][i] == 0 else 'ACTIVE' for i in range(len(trucks_report_df))]
+trucks_report_df['Drivers'] = driver_names
+trucks_report_df['Status'] = truck_reports
+del trucks_report_df['available']
+trucks_report_df.rename(columns = {'truck_id':'Truck number',
+                                   'latitude': 'Latitude',
+                                   'longitude': 'Longitude'}, inplace=True)
 #  Trucks status Dataframe creation
 condition_fuel_mount = ['Empty', 'Full', '50%']
 time_of_day = ["morning", "evening", "afternoon"]
-truck_status = {'Fuel_L': [random.randrange(1, 80, 1) for i in range(choose_len)],
-                "mount_mc": [random.randrange(1, 15, 1) for i in range(choose_len)],
-                "truck_fuel_situation": [random.choice(condition_fuel_mount) for i in range(choose_len)],
-                "time": [random.choice(time_of_day) for i in range(choose_len)]}
+truck_status = {'Fuel_L': [random.randrange(1, 80, 1) for i in range(len(trucks_report_df))],
+                "mount_mc": [random.randrange(1, 15, 1) for i in range(len(trucks_report_df))],
+                "truck_fuel_situation": [random.choice(condition_fuel_mount) for i in range(len(trucks_report_df))],
+                "time": [random.choice(time_of_day) for i in range(len(trucks_report_df))]}
 truck_status_df = pd.DataFrame(truck_status)
 # Waste summary Dataframe 
 waste_type = ['PET', 'alluminium', "paper", "glassware", "metalware", "undifferentiated"]
 TIME_week = ['Monday', "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Suday"]
-waste_summary = {"waste": [random.choice(waste_type) for i in range(choose_len)],
-                 "total_waste": [random.randrange(1, 648, 1) for i in range(choose_len)],
-                 "day": [random.choice(TIME_week) for i in range(choose_len)]}
+waste_summary = {"waste": [random.choice(waste_type) for i in range(len(trucks_report_df))],
+                 "total_waste": [random.randrange(1, 648, 1) for i in range(len(trucks_report_df))],
+                 "day": [random.choice(TIME_week) for i in range(len(trucks_report_df))]}
 waste_summary_df = pd.DataFrame(waste_summary)
 wastes = waste_summary_df.waste.unique()
 # Variables
@@ -383,7 +385,6 @@ home = html.Div(
 BIN = html.Div(children=[
     # Table 1
     html.Div(children=[
-
         html.H3("Bins"),
         html.Div(
             dash_table.DataTable(
@@ -391,7 +392,7 @@ BIN = html.Div(children=[
                 columns=[
                     {"name": i, "id": i, "selectable": True} for i in bins_pred_df.columns
                 ],
-                data=bins_pred_df.to_dict('records'),
+                data=bins_pred_df.to_dict('records'),  # TODO: refresh when we generate predictions
                 editable=True,
                 filter_action="native",
                 sort_action="native",
@@ -422,7 +423,9 @@ TRUCKS = html.Div(children=[
     ]),
     html.P('Here you can find all the informations about the active trucks.'),
     html.Div(children=[
-        html.H3("Looks like there's nothing here (yet)")
+        html.H3("Looks like there's nothing here (yet)"),
+        html.P("In the future, here you will find all information and settings regarding the path planning.For example, you will be able to choose the subset of bins or the number of \"zones\" assigned to the trucks."),
+        html.P("You will be able to also explore through various statistical and analysis results about the data you collected.")
     ])
 ])
 # help
@@ -432,10 +435,15 @@ HELP = html.Div(children=[
     ]),
     html.Div(children=[
         html.H3('What is this?'),
+        html.P("This is a dashboard where you can plan your entire garbage collection process."),
         html.H3('How can I predict garbage filling?'),
+        html.P("You can predict the garbage filling and plan the garbage collection route in your area by clicking the \"Predict\" button under the map."),
         html.H3('Where can I see the trucks?'),
-        html.H3('How does the dashboard work?'),
-        html.H3('Where can I get some support?')
+        html.P("Your trucks are all on the map! You can select which one to focus on by selecting its unique identifier in the dropdown menu."),
+        html.H3('Where can I see the bin history?'),
+        html.P("Our system keeps track of all your bins' history! This can be accessed at the 'Bin overview' page, where you will see both the history of the bins and our predictions."),
+        html.H3('Where can I get some support?'),
+        html.P("You can ask for support at totally-valid-mail@notatest.com.")
     ])
 ])
 # main content
